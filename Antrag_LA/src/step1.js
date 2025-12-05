@@ -39,6 +39,35 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const initialData = savedStepData || paramData;
 
+    function setupMatrikelInput() {
+        if (!matrikel) return;
+
+        matrikel.setAttribute("inputmode", "numeric");
+        matrikel.setAttribute("pattern", "[0-9]*");
+
+        const sanitize = () => {
+            const digitsOnly = matrikel.value.replace(/\D+/g, "");
+            if (digitsOnly !== matrikel.value) {
+                matrikel.value = digitsOnly;
+            }
+        };
+
+        // Blockiere nicht-numerische Eingaben direkt
+        matrikel.addEventListener("beforeinput", event => {
+            if (event.data && /\D/.test(event.data)) {
+                event.preventDefault();
+            }
+        });
+
+        matrikel.addEventListener("input", () => {
+            sanitize();
+            persistFormData();
+        });
+
+        // Initial sicherstellen, dass nur Ziffern gesetzt sind
+        sanitize();
+    }
+
     function collectFormData() {
         return {
             vorname: vorname?.value.trim() || "",
@@ -161,9 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    [vorname, nachname, matrikel, kurs, studiengangsleitung, dateRangeInput].forEach(el => {
+    [vorname, nachname, kurs, studiengangsleitung, dateRangeInput].forEach(el => {
         el?.addEventListener("input", persistFormData);
     });
+    setupMatrikelInput();
     [studiengang, semester, vertiefungSelect].forEach(el => {
         el?.addEventListener("change", persistFormData);
     });
