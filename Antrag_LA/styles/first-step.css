@@ -163,6 +163,12 @@
     grid-column: auto; /* Standard: belege eine einzelne Grid-Spalte */
 }
 
+.input-hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    color: #8c1d18;
+}
+
 /* Utility: Feld über beide Spalten (volle Formularbreite) */
 .field--full {
     grid-column: 1 / -1;

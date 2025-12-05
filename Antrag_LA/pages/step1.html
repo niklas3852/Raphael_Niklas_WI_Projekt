@@ -72,7 +72,23 @@
 
                 <!-- Matrikel-NR Dropdown -->
                 <div class="field">
-                    <input type="text" name="Matrikel" aria-label="Matrikelnummer" class="corner-input field__input" placeholder="Matrikel-Nr.*" required title="Matrikelnummer eingeben" inputmode="numeric" pattern="\d+" autocomplete="off">
+                    <label class="visually-hidden" for="matrikelnummer">Matrikelnummer</label>
+                    <input
+                            id="matrikelnummer"
+                            type="number"
+                            name="Matrikel"
+                            aria-label="Matrikelnummer"
+                            class="corner-input field__input"
+                            placeholder="Matrikel-Nr.*"
+                            required
+                            title="Matrikelnummer eingeben"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            autocomplete="off"
+                            aria-describedby="matrikelnummer-hint"
+                            min="0"
+                    >
+                    <p id="matrikelnummer-hint" class="input-hint" role="alert" aria-live="polite"></p>
                     <button type="button" class="field__icon" data-tooltip="Deine Matrikelnummer wurde bereits systemseitig vorausgefüllt (kann aber bearbeitet werden)." aria-label="Information: Matrikelnummer">i</button>
                 </div>
 

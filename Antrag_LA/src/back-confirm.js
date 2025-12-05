@@ -1,42 +1,15 @@
 // filepath: src/back-confirm.js
-// Intercept "Zurück" links in navigation buttons and ask for confirmation.
-// If confirmed, remove the current step data for the logged-in user (or guest) and then navigate.
+// Stellt ein einheitliches, tastaturbedienbares Bestätigungs-Modal für alle Zurück-Aktionen bereit.
+// Ziel: Jeder Rückschritt fragt nach, ohne dabei versehentlich Formulardaten zu verlieren.
 (function () {
-    function getUserStorageKeyForMatric(matrikel) {
-        // Return guest key when no matrikel provided to keep naming consistent with other helpers
-        if (!matrikel) return 'la_userdata_guest';
-        return 'la_userdata_' + String(matrikel);
-    }
+    const MODAL_ID = 'back-confirm-modal';
+    let pendingHref = null;
+    let pendingStepId = null;
+    let lastFocused = null;
 
-    function clearUserStepDataForMatric(matrikel, stepId) {
-        try {
-            if (!stepId) return;
-            // Prefer centralized storageManager API if available
-            if (window.storageManager && typeof window.storageManager.resetStep === 'function') {
-                try { window.storageManager.resetStep(matrikel, stepId); return; } catch (e) { /* fallback below */ }
-            }
-
-            const key = getUserStorageKeyForMatric(matrikel);
-            const raw = localStorage.getItem(key);
-            if (!raw) return;
-            const obj = JSON.parse(raw);
-            if (!obj || !obj.steps) return;
-            if (Object.prototype.hasOwnProperty.call(obj.steps, stepId)) {
-                delete obj.steps[stepId];
-                // ensure we write back a sanitized object
-                obj.steps = obj.steps || {};
-                // if no steps left remove key
-                if (!Object.keys(obj.steps).length) {
-                    localStorage.removeItem(key);
-                } else {
-                    localStorage.setItem(key, JSON.stringify(obj));
-                }
-            }
-        } catch (e) {
-            console.error('Fehler beim Löschen der Step-Daten', e);
-        }
-    }
-
+    // -------------------------------------------------------------
+    // Hilfsfunktionen zum Ermitteln des aktuellen/angepeilten Steps
+    // -------------------------------------------------------------
     function extractStepFromHref(rawHref) {
         if (!rawHref) return null;
         try {
@@ -48,43 +21,123 @@
         }
     }
 
+    function getCurrentStepId() {
+        const stepAttr = document.body?.getAttribute('data-step');
+        return stepAttr ? `step${stepAttr}` : null;
+    }
+
+    // -------------------------------------------------------------
+    // Modal-Baukasten (Aria-konform + Fokussteuerung)
+    // -------------------------------------------------------------
+    function ensureModalExists() {
+        if (document.getElementById(MODAL_ID)) return document.getElementById(MODAL_ID);
+
+        const overlay = document.createElement('div');
+        overlay.id = MODAL_ID;
+        overlay.className = 'back-modal is-hidden';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'back-modal-title');
+        overlay.innerHTML = `
+            <div class="back-modal__dialog">
+                <div class="back-modal__header">
+                    <span id="back-modal-title">Zur vorherigen Seite wechseln?</span>
+                </div>
+                <p class="back-modal__body" id="back-modal-body">
+                    Deine Eingaben bleiben dank Zwischenspeicherung erhalten. Möchtest du trotzdem zurück navigieren?
+                </p>
+                <div class="back-modal__actions">
+                    <button type="button" class="btn back-modal__btn" data-action="cancel">Abbrechen</button>
+                    <button type="button" class="btn primary back-modal__btn" data-action="confirm">Ja, zurück</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Tastaturbedienung: ESC schließt das Modal ohne Navigation.
+        overlay.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+                ev.preventDefault();
+                hideModal();
+            }
+        });
+
+        overlay.querySelector('[data-action="cancel"]').addEventListener('click', hideModal);
+        overlay.querySelector('[data-action="confirm"]').addEventListener('click', handleModalConfirm);
+
+        return overlay;
+    }
+
+    function showModal(targetHref, stepId) {
+        pendingHref = targetHref;
+        pendingStepId = stepId;
+        lastFocused = document.activeElement;
+
+        const modal = ensureModalExists();
+        modal.classList.remove('is-hidden');
+        modal.setAttribute('aria-hidden', 'false');
+
+        // Fokus sofort auf den Bestätigen-Button legen, damit Screenreader wissen, dass ein Dialog offen ist.
+        const confirmBtn = modal.querySelector('[data-action="confirm"]');
+        confirmBtn?.focus();
+    }
+
+    function hideModal() {
+        const modal = document.getElementById(MODAL_ID);
+        if (!modal) return;
+        modal.classList.add('is-hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        if (lastFocused?.focus) {
+            lastFocused.focus();
+        }
+        pendingHref = null;
+        pendingStepId = null;
+    }
+
+    // -------------------------------------------------------------
+    // Datenverwaltung: optionales Zurücksetzen, falls explizit gefordert
+    // -------------------------------------------------------------
+    function resetStepData(stepId) {
+        if (!stepId || !window.storageManager) return;
+        // Nur zurücksetzen, wenn der Link es ausdrücklich verlangt (data-clear-step)
+        try {
+            window.storageManager.resetStep(stepId);
+        } catch (e) {
+            // Absichtliches Schweigen: Persistenz darf nicht brechen.
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Event-Handler
+    // -------------------------------------------------------------
+    function handleModalConfirm() {
+        if (!pendingHref) {
+            hideModal();
+            return;
+        }
+        const linkNeedingClear = document.querySelector(`[data-clear-step="${pendingStepId || ''}"]`);
+        if (linkNeedingClear) {
+            resetStepData(pendingStepId);
+        }
+        window.location.href = pendingHref;
+    }
+
     function handleBackClick(ev) {
         try {
             const target = ev.currentTarget || ev.target;
             const href = (target && target.getAttribute && target.getAttribute('href')) || './index.html';
 
-            // determine current step from body[data-step] or from closest .step-navigation-buttons
-            let stepAttr = null;
-            if (document.body && document.body.getAttribute) stepAttr = document.body.getAttribute('data-step');
-            if (!stepAttr) {
-                const nav = target && target.closest && target.closest('.step-navigation-buttons');
-                if (nav && nav.getAttribute) stepAttr = nav.getAttribute('data-step');
-            }
-            const curStepNumber = stepAttr ? parseInt(stepAttr, 10) : null;
-            const stepId = curStepNumber ? ('step' + curStepNumber) : null;
+            const curStepNumber = parseInt(document.body?.dataset?.step || '0', 10) || null;
+            const stepId = getCurrentStepId();
 
-            // decide whether this navigation is actually backwards
             const targetStep = extractStepFromHref(href);
-            const isBackwards = targetStep && curStepNumber ? targetStep < curStepNumber : !!(target && target.dataset && target.dataset.back !== undefined);
-            if (!isBackwards) return; // allow normal navigation for forward/neutral steps
+            const isBackwards = targetStep && curStepNumber ? targetStep < curStepNumber : !!target?.dataset?.back;
+            if (!isBackwards) return;
 
-            if (ev && ev.preventDefault) ev.preventDefault();
+            if (ev?.preventDefault) ev.preventDefault();
 
-            const current = (typeof window.getCurrentUser === 'function') ? window.getCurrentUser() : null;
-            const matrikel = current && current.matrikelnummer ? current.matrikelnummer : null;
-
-            const msg = 'Wenn du einen Schritt zurück gehst, gehen alle deine Angaben aus dem aktuellen Schritt verloren. Möchtest du wirklich zurück?';
-            const confirmed = window.confirm(msg);
-            if (!confirmed) return;
-
-            if (stepId) {
-                clearUserStepDataForMatric(matrikel, stepId);
-                if (stepId === 'step2') {
-                    try { window._la_selected_university = null; } catch (e) {}
-                }
-            }
-
-            setTimeout(() => { window.location.href = href; }, 80);
+            showModal(href, stepId);
         } catch (e) {
             console.error('back confirm handler error', e);
         }
@@ -92,7 +145,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         try {
-            // select anchor with id=back and elements with .back-btn or button[data-back]
             const backLinks = Array.from(document.querySelectorAll('.step-navigation-buttons a[href], a#back, .back-btn, button[data-back]'));
             const uniqueLinks = Array.from(new Set(backLinks));
             uniqueLinks.forEach(link => {
@@ -100,7 +152,6 @@
                 link.addEventListener('click', handleBackClick);
             });
         } catch (e) {
-            // ignore
             console.error('back-confirm init error', e);
         }
     });

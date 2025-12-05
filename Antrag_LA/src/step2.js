@@ -37,6 +37,14 @@ function mergeParamsWithStep1(baseParams = new URLSearchParams()) {
 const params = mergeParamsWithStep1(new URLSearchParams(window.location.search));
 const savedStep2 = window.storageManager?.getStep?.('step2') || {};
 
+// Navigationslink zurück zu Step 1 immer mit gespeicherten GET-Parametern bestücken,
+// damit ein Reload oder Rücksprung keine Formulardaten verliert.
+const backLinkStep1 = document.getElementById('back');
+if (backLinkStep1) {
+    const backParams = mergeParamsWithStep1(new URLSearchParams());
+    backLinkStep1.href = `./step1.html?${backParams.toString()}`;
+}
+
 const continentWrapper = document.createElement("div");
 continentWrapper.id = "continent-result-wrapper";
 
@@ -223,18 +231,16 @@ function renderPaginationControls() {
         }
     });
 
-    const pageIndicator = document.createElement("span");
-    pageIndicator.className = "page-indicator";
-    pageIndicator.setAttribute('aria-label', `Seite ${activePage} von ${totalPages}`);
-    pageIndicator.innerHTML = `
-        <svg class="page-indicator__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <rect x="3" y="4" width="8" height="6" rx="1.5"></rect>
-            <rect x="3" y="12" width="8" height="6" rx="1.5"></rect>
-            <rect x="13" y="4" width="8" height="6" rx="1.5"></rect>
-            <rect x="13" y="12" width="8" height="6" rx="1.5"></rect>
-        </svg>
-        <span class="page-indicator__text">${activePage} / ${totalPages}</span>
-    `;
+        const pageIndicator = document.createElement("span");
+        pageIndicator.className = "page-indicator";
+        pageIndicator.setAttribute('aria-label', `Seite ${activePage} von ${totalPages}`);
+        pageIndicator.innerHTML = `
+            <svg class="page-indicator__icon" viewBox="0 0 24 24" role="img" aria-labelledby="pagination-title" focusable="false">
+                <title id="pagination-title">Seitenauswahl</title>
+                <path d="M4.5 5.5h15a1 1 0 0 1 0 2h-15a1 1 0 0 1 0-2zm0 5h15a1 1 0 0 1 0 2h-15a1 1 0 0 1 0-2zm0 5h15a1 1 0 0 1 0 2h-15a1 1 0 0 1 0-2z" fill="currentColor"></path>
+            </svg>
+            <span class="page-indicator__text">${activePage} / ${totalPages}</span>
+        `;
 
     paginationEl.appendChild(prevBtn);
     paginationEl.appendChild(pageIndicator);
