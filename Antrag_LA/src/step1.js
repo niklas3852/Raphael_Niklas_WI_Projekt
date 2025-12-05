@@ -20,6 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateRangeInput = document.getElementById("date-range-picker");
 
+    const studiengaenge = Array.isArray(window.dhbwStudiengaenge) ? window.dhbwStudiengaenge : [];
+    const studiengangMap = studiengaenge.reduce((acc, sg) => {
+        acc[sg.id] = sg;
+        return acc;
+    }, {});
+
     const STEP_KEY = 'step1';
 
 
@@ -72,6 +78,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return merged;
     }
 
+    function populateStudiengangOptions() {
+        if (!studiengang) return;
+
+        studiengaenge.forEach(sg => {
+            const option = document.createElement("option");
+            option.value = sg.id;
+            option.textContent = sg.name;
+            studiengang.appendChild(option);
+        });
+    }
+
     // =====================================================
     //   STUDIENGANG → VERTIEFUNG LOGIK
     // =====================================================
@@ -81,22 +98,24 @@ document.addEventListener("DOMContentLoaded", () => {
         vertiefungSelect.innerHTML = `<option value="">Bitte wählen...</option>`;
 
         const sg = studiengang?.value;
-        if (!sg || !window.dhbwCourses || !window.dhbwCourses[sg]) {
+        const current = sg ? studiengangMap[sg] : null;
+        if (!current) {
             vertiefungSelect.disabled = true;
             return;
         }
 
-        const vers = window.dhbwCourses[sg].semesters.vertiefungen || [];
+        const vers = current.vertiefungen || [];
         vertiefungSelect.disabled = false;
 
         vers.forEach(v => {
             const o = document.createElement("option");
-            o.value = v.value || v;
-            o.textContent = v.label || v;
+            o.value = v.id || v.value || v;
+            o.textContent = v.name || v.label || v;
             vertiefungSelect.appendChild(o);
         });
     }
 
+    populateStudiengangOptions();
     const initialData = restoreFromStateOrParams();
 
     if (studiengang) {

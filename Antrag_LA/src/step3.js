@@ -65,14 +65,16 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         // 2) DATENBANKEN LADEN
         // ============================================================
-        const dhbwDefs = window.dhbwCourses || {};
+        const studiengaenge = Array.isArray(window.dhbwStudiengaenge) ? window.dhbwStudiengaenge : [];
+        const studiengangMap = studiengaenge.reduce((acc, sg) => {
+            acc[sg.id] = sg;
+            return acc;
+        }, {});
+
         const partnerDefs = window.compatibleCourses || {};
 
         const studiengangId = user.studiengang;
-        const studiengangName =
-            dhbwDefs[studiengangId]?.name ||
-            user.studiengang ||
-            "Studiengang unbekannt";
+        const studiengangName = studiengangMap[studiengangId]?.name || user.studiengang || "Studiengang unbekannt";
 
 
         // ============================================================
@@ -141,8 +143,15 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         // 6) DHBW-Kurse
         // ============================================================
-        function loadDHBWCourses() {
-            return dhbwDefs[studiengangId]?.semesters?.[String(semester)] || [];
+        async function loadDHBWCourses() {
+            const listPromise = window.getDhbwCourseList ? window.getDhbwCourseList() : window.dhbwCourses || [];
+            const allCourses = await Promise.resolve(listPromise);
+
+            return allCourses.filter(c =>
+                c.programId === studiengangId &&
+                (!user.vertiefung || c.vertiefungId === user.vertiefung) &&
+                String(c.semester) === String(semester)
+            );
         }
 
 
@@ -437,8 +446,8 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         // 12) DHBW-TABELLE
         // ============================================================
-        function renderDHBWTable() {
-            const dhbwCourses = loadDHBWCourses();
+        async function renderDHBWTable() {
+            const dhbwCourses = await loadDHBWCourses();
             dhbwTbl.innerHTML = "";
 
             let sum = 0;
@@ -485,8 +494,12 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         // 14) INIT
         // ============================================================
-        renderDHBWTable();
-        renderPartnerTable();
+        const refreshTables = async () => {
+            await renderDHBWTable();
+            renderPartnerTable();
+        };
+
+        refreshTables();
         showWelcome(findCity());
 
         document.addEventListener("keydown", e => {
@@ -494,9 +507,7 @@ import { cities } from "../db/university_data/cities.js";
                 semester = parseInt(e.key, 10);
                 user.semester = semester;
                 partnerPage = 1;
-                renderDHBWTable();
-                renderPartnerTable();
-                persistStep3State();
+                refreshTables().then(() => persistStep3State());
             }
         });
 
