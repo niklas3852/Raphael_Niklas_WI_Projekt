@@ -9,39 +9,21 @@ const paginationEl = document.createElement("div");
 paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
 
-function mergeParamsWithStep1(baseParams = new URLSearchParams()) {
+function mergeParams(baseParams = new URLSearchParams()) {
     const merged = new URLSearchParams(baseParams.toString());
-    const savedStep1 = window.storageManager?.getStep?.('step1') || {};
+    const current = window.urlState?.getParams ? window.urlState.getParams() : new URLSearchParams(window.location.search);
 
-    const mapping = {
-        vorname: 'vorname',
-        nachname: 'nachname',
-        matrikel: 'matrikel',
-        kurs: 'kurs',
-        studiengang: 'studiengang',
-        semester: 'semester',
-        vertiefung: 'vertiefung',
-        studiengangsleitung: 'studiengangsleitung',
-        zeitraum: 'zeitraum'
-    };
-
-    Object.entries(mapping).forEach(([paramKey, stateKey]) => {
-        if (!merged.get(paramKey) && savedStep1[stateKey]) {
-            merged.set(paramKey, savedStep1[stateKey]);
-        }
-    });
-
+    current.forEach((value, key) => merged.set(key, value));
     return merged;
 }
 
-const params = mergeParamsWithStep1(new URLSearchParams(window.location.search));
-const savedStep2 = window.storageManager?.getStep?.('step2') || {};
+const params = mergeParams(new URLSearchParams(window.location.search));
 
 // Navigationslink zurück zu Step 1 immer mit gespeicherten GET-Parametern bestücken,
 // damit ein Reload oder Rücksprung keine Formulardaten verliert.
 const backLinkStep1 = document.getElementById('back');
 if (backLinkStep1) {
-    const backParams = mergeParamsWithStep1(new URLSearchParams());
+    const backParams = mergeParams(new URLSearchParams());
     backLinkStep1.href = `./step1.html?${backParams.toString()}`;
 }
 
@@ -337,13 +319,10 @@ function filterCitiesByContinent(continent) {
 }
 
 function persistSelectedUniversity(city) {
-    if (!city || !window.storageManager) return;
-    window.storageManager.setStep('step2', {
-        selectedUniversity: {
-            id: city.id,
-            name: city.name,
-            country: city.country
-        }
+    if (!city) return;
+    window.urlState?.setParams?.({
+        university: city.name,
+        universityId: city.id
     });
 }
 
@@ -543,7 +522,7 @@ function selectUniversity(city) {
     // ----------------------------------------------------
     // URL-Parameter auslesen
     // ----------------------------------------------------
-    const params = mergeParamsWithStep1(new URLSearchParams(window.location.search));
+    const params = mergeParams(new URLSearchParams(window.location.search));
 
     // ----------------------------------------------------
     // Falls schon vorhanden → überschreiben
@@ -685,13 +664,10 @@ function createCarouselControls() {
 function resolveSavedCity() {
     const fromParamsId = params.get('universityId');
     const fromParamsName = params.get('university');
-    const savedSelection = savedStep2?.selectedUniversity;
 
     return (
         cities.find(c => !!fromParamsId && c.id === fromParamsId) ||
         cities.find(c => !!fromParamsName && c.name === fromParamsName) ||
-        cities.find(c => savedSelection?.id && c.id === savedSelection.id) ||
-        cities.find(c => savedSelection?.name && c.name === savedSelection.name) ||
         null
     );
 }

@@ -99,13 +99,19 @@
     // Datenverwaltung: optionales Zurücksetzen, falls explizit gefordert
     // -------------------------------------------------------------
     function resetStepData(stepId) {
-        if (!stepId || !window.storageManager) return;
-        // Nur zurücksetzen, wenn der Link es ausdrücklich verlangt (data-clear-step)
-        try {
-            window.storageManager.resetStep(stepId);
-        } catch (e) {
-            // Absichtliches Schweigen: Persistenz darf nicht brechen.
-        }
+        if (!stepId || !window.urlState?.setParams) return;
+        const fieldsByStep = {
+            step1: ["vorname", "nachname", "matrikel", "kurs", "studiengang", "semester", "vertiefung", "studiengangsleitung", "zeitraum"],
+            step2: ["university", "universityId"],
+            step3: ["selectedCourses", "semester"]
+        };
+
+        const deletions = {};
+        (fieldsByStep[stepId] || []).forEach(key => {
+            deletions[key] = "";
+        });
+
+        window.urlState.setParams(deletions);
     }
 
     // -------------------------------------------------------------

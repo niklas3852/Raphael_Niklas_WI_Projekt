@@ -10,7 +10,7 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         // 1) URL PARAMETER LADEN
         // ============================================================
-        const params = new URLSearchParams(window.location.search);
+        const params = window.urlState?.getParams ? window.urlState.getParams() : new URLSearchParams(window.location.search);
 
         const user = {
             vorname: params.get("vorname") || "",
@@ -25,41 +25,15 @@ import { cities } from "../db/university_data/cities.js";
             university: params.get("university") || "",
             universityId: params.get("universityId") || ""
         };
-        const savedStep1 = window.storageManager?.getStep?.('step1') || {};
-        const savedStep2 = window.storageManager?.getStep?.('step2') || {};
-        const savedStep3 = window.storageManager?.getStep?.('step3') || {};
-
         const selectedFromParams = (() => {
             try { return JSON.parse(params.get("selectedCourses") || "[]"); }
             catch (e) { return []; }
         })();
 
-        Object.entries({
-            vorname: savedStep1.vorname,
-            nachname: savedStep1.nachname,
-            matrikel: savedStep1.matrikel,
-            kurs: savedStep1.kurs,
-            studiengang: savedStep1.studiengang,
-            semester: savedStep1.semester,
-            vertiefung: savedStep1.vertiefung,
-            zeitraum: savedStep1.zeitraum,
-            studiengangsleitung: savedStep1.studiengangsleitung,
-        }).forEach(([key, value]) => {
-            if (!user[key] && value) user[key] = value;
-        });
-
-        if (!user.university && savedStep2?.selectedUniversity?.name) {
-            user.university = savedStep2.selectedUniversity.name;
-            user.universityId = savedStep2.selectedUniversity.id || user.universityId;
-        }
-
-        let semester = parseInt(user.semester || savedStep3.semester, 10) || 1;
+        let semester = parseInt(user.semester, 10) || 1;
         user.semester = semester;
 
-        let selectedCourses = new Set([
-            ...(Array.isArray(savedStep3.selectedCourses) ? savedStep3.selectedCourses : []),
-            ...selectedFromParams
-        ]);
+        let selectedCourses = new Set(selectedFromParams);
 
 
         // ============================================================
@@ -237,9 +211,8 @@ import { cities } from "../db/university_data/cities.js";
         // 9) SELECTED-COURSES LISTE & PERSISTENZ
         // ============================================================
         function persistStep3State() {
-            if (!window.storageManager) return;
-            window.storageManager.setStep('step3', {
-                selectedCourses: Array.from(selectedCourses),
+            window.urlState?.setParams?.({
+                selectedCourses: JSON.stringify(Array.from(selectedCourses)),
                 semester
             });
         }
@@ -353,18 +326,14 @@ import { cities } from "../db/university_data/cities.js";
                 semester: semester,
                 vertiefung: user.vertiefung,
                 zeitraum: user.zeitraum,
-                studiengangsleitung: user.studiengangsleitung
+                studiengangsleitung: user.studiengangsleitung,
+                university: user.university,
+                universityId: user.universityId
             };
 
             Object.entries(mapping).forEach(([key, value]) => {
                 if (value) merged.set(key, value);
             });
-
-            const selectedUni = savedStep2?.selectedUniversity;
-            if (selectedUni) {
-                merged.set('university', selectedUni.name || user.university || '');
-                if (selectedUni.id) merged.set('universityId', selectedUni.id);
-            }
 
             return merged;
         }
@@ -486,7 +455,6 @@ import { cities } from "../db/university_data/cities.js";
         const backToStep2Link = qs("#back") || qs("#back-to-step2");
         if (backToStep2Link) {
             const paramsForBack = mergeParamsWithState(new URLSearchParams(window.location.search));
-            paramsForBack.delete("selectedCourses");
             backToStep2Link.href = "./step2.html?" + paramsForBack.toString();
         }
 

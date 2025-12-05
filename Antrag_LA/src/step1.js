@@ -27,9 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return acc;
     }, {});
 
-    const STEP_KEY = 'step1';
-
-
     function buildStepPayload() {
         return {
             vorname: vorname?.value.trim() || "",
@@ -44,29 +41,25 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Speichert den aktuellen Formularstand im localStorage, damit ein Seitenwechsel oder Reload keine Eingaben verliert.
-    function persistStepData() {
-        if (!window.storageManager) return;
-        window.storageManager.setStep(STEP_KEY, buildStepPayload());
+    function syncUrlWithForm(updates = {}) {
+        const payload = { ...buildStepPayload(), ...updates };
+        return window.urlState?.setParams ? window.urlState.setParams(payload) : new URLSearchParams(window.location.search);
     }
 
-    // Stellt den Formularzustand aus der URL oder dem lokalen Zwischenspeicher wieder her,
-    // damit Back-Navigation und Reloads keine Felder leeren.
-    function restoreFromStateOrParams() {
-        const saved = window.storageManager?.getStep(STEP_KEY) || {};
-        const params = new URLSearchParams(window.location.search);
+    // Stellt den Formularzustand anhand der URL-Parameter wieder her
+    function restoreFromParams() {
+        const params = window.urlState?.getParams ? window.urlState.getParams() : new URLSearchParams(window.location.search);
 
         const merged = {
-            ...saved,
-            vorname: params.get("vorname") || saved.vorname || "",
-            nachname: params.get("nachname") || saved.nachname || "",
-            matrikel: params.get("matrikel") || saved.matrikel || "",
-            kurs: params.get("kurs") || saved.kurs || "",
-            studiengang: params.get("studiengang") || saved.studiengang || "",
-            semester: params.get("semester") || saved.semester || "",
-            vertiefung: params.get("vertiefung") || saved.vertiefung || "",
-            studiengangsleitung: params.get("studiengangsleitung") || saved.studiengangsleitung || "",
-            zeitraum: params.get("zeitraum") || saved.zeitraum || ""
+            vorname: params.get("vorname") || "",
+            nachname: params.get("nachname") || "",
+            matrikel: params.get("matrikel") || "",
+            kurs: params.get("kurs") || "",
+            studiengang: params.get("studiengang") || "",
+            semester: params.get("semester") || "",
+            vertiefung: params.get("vertiefung") || "",
+            studiengangsleitung: params.get("studiengangsleitung") || "",
+            zeitraum: params.get("zeitraum") || ""
         };
 
         if (vorname) vorname.value = merged.vorname || "";
@@ -121,12 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     populateStudiengangOptions();
-    const initialData = restoreFromStateOrParams();
+    const initialData = restoreFromParams();
 
     if (studiengang) {
         studiengang.addEventListener("change", () => {
             updateVertiefungOptions();
-            persistStepData();
+            syncUrlWithForm();
         });
         updateVertiefungOptions();
     }
@@ -150,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 picker.on("selected", (d1, d2) => {
                     if (d1 && d2) {
                         dateRangeInput.value = `${d1.format("DD.MM.YYYY")} - ${d2.format("DD.MM.YYYY")}`;
-                        persistStepData();
+                        syncUrlWithForm();
                     }
                 });
             }
@@ -159,11 +152,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Persistierende Eingaben & Nummern-Validation für Matrikelnummer
     [vorname, nachname, kurs, studiengangsleitung, dateRangeInput].forEach(el => {
-        el?.addEventListener("input", persistStepData);
+        el?.addEventListener("input", () => syncUrlWithForm());
     });
 
     [semester, vertiefungSelect].forEach(el => {
-        el?.addEventListener("change", persistStepData);
+        el?.addEventListener("change", () => syncUrlWithForm());
     });
 
     function validateMatrikelInput() {
@@ -190,30 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (matrikel) {
         matrikel.addEventListener("input", () => {
             validateMatrikelInput();
-            persistStepData();
+            syncUrlWithForm();
         });
         matrikel.addEventListener("blur", validateMatrikelInput);
-    }
-
-
-    // =====================================================
-    //   URL PARAMETER ERSTELLEN (Option B)
-    // =====================================================
-
-    function buildUrlParams() {
-        const params = new URLSearchParams();
-
-        params.set("vorname", vorname?.value.trim() || "");
-        params.set("nachname", nachname?.value.trim() || "");
-        params.set("matrikel", matrikel?.value.trim() || "");
-        params.set("kurs", kurs?.value.trim() || "");
-        params.set("studiengang", studiengang?.value || "");
-        params.set("semester", semester?.value || "");
-        params.set("vertiefung", vertiefungSelect?.value || "");
-        params.set("studiengangsleitung", studiengangsleitung?.value.trim() || "");
-        params.set("zeitraum", dateRangeInput?.value.trim() || "");
-
-        return params.toString();
     }
 
 
@@ -225,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nextBtn.addEventListener("click", e => {
             e.preventDefault();
 
-            persistStepData();
+            syncUrlWithForm();
 
             const matrikelOk = validateMatrikelInput();
             if (!matrikelOk) {
@@ -239,7 +211,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const baseHref = nextBtn.getAttribute("href") || "./step2.html";
-            const finalUrl = `${baseHref}?${buildUrlParams()}`;
+            const updatedParams = syncUrlWithForm();
+            const finalUrl = `${baseHref}?${updatedParams.toString()}`;
 
             window.location.href = finalUrl;
         });
