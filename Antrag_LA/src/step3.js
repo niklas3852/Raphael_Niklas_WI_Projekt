@@ -1,6 +1,6 @@
 import { cities } from "../db/university_data/cities.js";
 import { initPageLoader, waitForImages } from "./loading-overlay.js";
-import { loadState, updateState } from "./shared-state.js";
+import { createUrlWithState, loadState, updateState } from "./shared-state.js";
 
 const pageLoader = initPageLoader({
     message: "Wir laden alle Module und Kursdaten...",
@@ -29,6 +29,9 @@ const pageLoader = initPageLoader({
         const state = loadState();
         const step1Data = state.step1Data || {};
         const step3State = state.step3 || {};
+
+        const backLink = qs(".step3-nav #back");
+        if (backLink) backLink.href = createUrlWithState("./step2.html", state);
 
         let user = {
             vorname: step1Data.vorname || "",
@@ -466,13 +469,13 @@ const pageLoader = initPageLoader({
             }
 
             const selected = Array.from(selectedCourseIds);
-            updateState(prev => ({
+            const nextState = updateState(prev => ({
                 ...prev,
                 step3: { semester, partnerPage, selectedCourses: selected }
             }));
 
             window.laAllowUnload = true;
-            window.location.href = "./step4.html";
+            window.location.href = createUrlWithState("./step4.html", nextState);
         });
 
 

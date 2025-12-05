@@ -1,7 +1,7 @@
 import { cities } from '../db/university_data/cities.js';
 import { continents } from '../db/university_data/continents.js';
 import { initPageLoader, waitForImages } from './loading-overlay.js';
-import { loadState, updateState } from './shared-state.js';
+import { createUrlWithState, loadState, updateState } from './shared-state.js';
 
 const welcomeTextEl = document.getElementById("welcome-text");
 const welcomeContainer = document.getElementById("welcome-city-container");
@@ -12,8 +12,14 @@ const paginationEl = document.createElement("div");
 paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
 
+const backLink = document.querySelector('.step1-nav #back');
+
 const appState = loadState();
 let selectedUniversity = appState.selectedUniversity || null;
+
+if (backLink) {
+    backLink.href = createUrlWithState('./step1.html', appState);
+}
 
 const continentWrapper = document.createElement("div");
 continentWrapper.id = "continent-result-wrapper";
@@ -49,8 +55,6 @@ const tileHeight = 280;
 const gap = 12;
 let activeContinent = null;
 const ROWS_PER_PAGE = 2;
-
-const backLink = document.querySelector('.step1-nav #back');
 
 let activePage = 1;
 let totalPages = 1;
@@ -536,12 +540,12 @@ function selectUniversity(city) {
     if (continueBtn) {
         continueBtn.textContent = `Fortfahren mit der ${city.name}`;
         continueBtn.onclick = () => {
-            updateState(prev => ({
+            const nextState = updateState(prev => ({
                 ...prev,
                 selectedUniversity: city
             }));
             window.laAllowUnload = true;
-            window.location.href = "./step3.html";
+            window.location.href = createUrlWithState("./step3.html", nextState);
         };
     }
 

@@ -1,4 +1,4 @@
-import { loadState, updateState } from "./shared-state.js";
+import { createUrlWithState, loadState, updateState } from "./shared-state.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -176,13 +176,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = collectFormData();
-            updateState(prev => ({
+            const nextState = updateState(prev => ({
                 ...prev,
                 step1Data: data
             }));
 
             window.laAllowUnload = true;
-            window.location.href = "./step2.html";
+            window.location.href = createUrlWithState("./step2.html", nextState);
         });
     }
 });
