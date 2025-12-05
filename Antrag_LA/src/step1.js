@@ -20,11 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateRangeInput = document.getElementById("date-range-picker");
 
-    const storage = window.storageManager;
-    const STEP_ID = 'step1';
-    const lastMatrikel = storage?.getLastMatrikel ? storage.getLastMatrikel() : 'guest';
-
-    const savedStepData = storage?.getStepData ? storage.getStepData(lastMatrikel, STEP_ID) : null;
     const urlParams = new URLSearchParams(window.location.search);
     const paramData = {
         vorname: urlParams.get('vorname') || '',
@@ -37,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         studiengangsleitung: urlParams.get('studiengangsleitung') || '',
         zeitraum: urlParams.get('zeitraum') || ''
     };
-    const initialData = savedStepData || paramData;
+    const initialData = paramData;
 
     function setupMatrikelInput() {
         if (!matrikel) return;
@@ -83,11 +78,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function persistFormData() {
-        if (!storage) return;
         const payload = collectFormData();
-        const activeMatrikel = payload.matrikel || lastMatrikel;
-        storage.setStepData(activeMatrikel, STEP_ID, payload);
-        storage.setLastMatrikel(activeMatrikel);
+        const params = new URLSearchParams(window.location.search);
+
+        Object.entries({
+            vorname: payload.vorname,
+            nachname: payload.nachname,
+            matrikel: payload.matrikel,
+            kurs: payload.kurs,
+            studiengang: payload.studiengang,
+            semester: payload.semester,
+            vertiefung: payload.vertiefung,
+            studiengangsleitung: payload.studiengangsleitung,
+            zeitraum: payload.zeitraum
+        }).forEach(([key, value]) => params.set(key, value || ""));
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, "", newUrl);
     }
 
     function hydrateFormFromData(data) {

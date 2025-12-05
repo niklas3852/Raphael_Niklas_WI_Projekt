@@ -1,66 +1,60 @@
-// filepath: src/back-confirm.js
-// Intercept "Zurück" links in navigation buttons and ask for confirmation.
-// If confirmed, remove the current step data for the logged-in user (or guest) and then navigate.
+// Intercept "Zurück" interactions and warn before leaving the current step.
 (function () {
-    function getUserStorageKeyForMatric(matrikel) {
-        // Return guest key when no matrikel provided to keep naming consistent with other helpers
-        if (!matrikel) return 'la_userdata_guest';
-        return 'la_userdata_' + String(matrikel);
-    }
+    const CONFIRM_MSG = 'Du springst einen Schritt zurück. Deine Eingaben bleiben erhalten. Möchtest du fortfahren?';
+    const BROWSER_BACK_MSG = 'Willst du wirklich die Seite verlassen? Eventuell gehen nicht gespeicherte Änderungen verloren.';
 
-    function clearUserStepDataForMatric(matrikel, stepId) {
-        try {
-            if (!stepId) return;
-            // Prefer centralized storageManager API if available
-            if (window.storageManager && typeof window.storageManager.resetStep === 'function') {
-                try { window.storageManager.resetStep(matrikel, stepId); return; } catch (e) { /* fallback below */ }
-            }
+    function buildBackUrl(defaultHref, currentStep) {
+        const prevStep = currentStep > 1 ? currentStep - 1 : currentStep;
+        const url = new URL(defaultHref || `./step${prevStep}.html`, window.location.href);
 
-            const key = getUserStorageKeyForMatric(matrikel);
-            const raw = localStorage.getItem(key);
-            if (!raw) return;
-            const obj = JSON.parse(raw);
-            if (!obj || !obj.steps) return;
-            if (Object.prototype.hasOwnProperty.call(obj.steps, stepId)) {
-                delete obj.steps[stepId];
-                // ensure we write back a sanitized object
-                obj.steps = obj.steps || {};
-                // if no steps left remove key
-                if (!Object.keys(obj.steps).length) {
-                    localStorage.removeItem(key);
-                } else {
-                    localStorage.setItem(key, JSON.stringify(obj));
-                }
-            }
-        } catch (e) {
-            console.error('Fehler beim Löschen der Step-Daten', e);
+        if (currentStep > 1) {
+            url.pathname = url.pathname.replace(/step\d+\.html/i, `step${prevStep}.html`);
         }
+
+        if (window.location.search) {
+            url.search = window.location.search;
+        }
+
+        return url.toString();
     }
 
     function handleBackClick(ev) {
         try {
             if (ev && ev.preventDefault) ev.preventDefault();
             const target = ev.currentTarget || ev.target;
-            const href = (target && target.getAttribute && target.getAttribute('href')) || './index.html';
+            const hrefAttr = (target && target.getAttribute && target.getAttribute('href')) || './index.html';
+            const currentStep = parseInt(document.body?.getAttribute('data-step') || '0', 10) || 0;
+            const destination = buildBackUrl(hrefAttr, currentStep);
 
-            const stepAttr = (document.body && document.body.getAttribute && document.body.getAttribute('data-step')) || null;
-            const curStep = stepAttr ? String(stepAttr) : null;
-            const stepId = curStep ? ('step' + curStep) : null;
-
-            // Confirmation message (data bleibt erhalten)
-            const msg = 'Du springst einen Schritt zurück. Deine Eingaben bleiben gespeichert. Möchtest du fortfahren?';
-            const confirmed = window.confirm(msg);
+            const confirmed = window.confirm(CONFIRM_MSG);
             if (!confirmed) return;
 
-            // small timeout to allow any UI updates before navigation
-            setTimeout(() => { window.location.href = href; }, 80);
+            setTimeout(() => { window.location.href = destination; }, 80);
         } catch (e) {
             console.error('back confirm handler error', e);
         }
     }
 
+    function installBrowserBackWarning() {
+        if (!window.history?.pushState) return;
+
+        window.history.pushState({ stay: true }, document.title, window.location.href);
+
+        window.addEventListener('popstate', (event) => {
+            if (!event.state || !event.state.stay) return;
+            const confirmed = window.confirm(BROWSER_BACK_MSG);
+            if (confirmed) {
+                window.history.back();
+            } else {
+                window.history.pushState({ stay: true }, document.title, window.location.href);
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         try {
+            installBrowserBackWarning();
+
             const currentStep = parseInt(document.body?.getAttribute('data-step') || '0', 10) || 0;
 
             const candidates = Array.from(document.querySelectorAll('a[href]'));
@@ -78,7 +72,6 @@
                 link.addEventListener('click', handleBackClick);
             });
         } catch (e) {
-            // ignore
             console.error('back-confirm init error', e);
         }
     });
