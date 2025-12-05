@@ -121,45 +121,13 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
 
+<script src="../src/storage-manager.js" defer></script>
 <script src="../src/globe.js"></script>
 <script src="../db/university_data/cities.js"></script>
 <script src="../db/university_data/continents.js"></script>
 
 <script type="module" src="../src/step2.js"></script>
 <script src="../src/back-confirm.js" defer></script>
-
-<!-- City Selection Navigation Logic --><script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const step1Nav = document.querySelector(".step1-nav");
-        const step2Nav = document.querySelector(".step2-nav");
-        const continueBtn = document.getElementById("continue-with-university");
-
-        // Funktion wird aufgerufen, sobald eine Uni ausgewählt wird
-        window.selectUniversity = function(universityName) {
-            // Ensure a minimal global selection exists so saving code can read it
-            try {
-                // prefer an already set full object (e.g. set by the module), otherwise store minimal data
-                if (!window._la_selected_university) window._la_selected_university = { name: universityName };
-            } catch (e) { window._la_selected_university = { name: universityName }; }
-
-            // City-Info anzeigen
-            document.getElementById("city-info").style.display = "block";
-
-            // Step 1 Navigation ausblenden
-            step1Nav.style.display = "none";
-
-            // Step 2 Navigation einblenden und Button-Text setzen
-            step2Nav.style.display = "flex";
-            continueBtn.textContent = `Fortfahren mit ${universityName}`;
-
-            continueBtn.onclick = () => {
-                // Weiterleitung zu Step 3
-                window.location.href = "./step3.html";
-            };
-        };
-    });
-</script>
-
 
 </body>
 </html>

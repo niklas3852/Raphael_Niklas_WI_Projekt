@@ -27,7 +27,7 @@ const pageLoader = initPageLoader({
         // ============================================================
         const params = new URLSearchParams(window.location.search);
 
-        const user = {
+        let user = {
             vorname: params.get("vorname") || "",
             nachname: params.get("nachname") || "",
             matrikel: params.get("matrikel") || "",
@@ -40,6 +40,23 @@ const pageLoader = initPageLoader({
             university: params.get("university") || "",
             universityId: params.get("universityId") || ""
         };
+
+        const storage = window.storageManager;
+        const activeMatrikel = user.matrikel || storage?.getLastMatrikel?.() || "guest";
+        const storedStep1 = storage?.getStepData(activeMatrikel, 'step1');
+        const storedStep2 = storage?.getStepData(activeMatrikel, 'step2');
+        const storedStep3 = storage?.getStepData(activeMatrikel, 'step3');
+
+        if (storedStep1) {
+            user = { ...user, ...storedStep1 };
+        }
+        if (storedStep2?.university) {
+            user.university = storedStep2.university.name || storedStep2.university;
+            user.universityId = storedStep2.university.id || storedStep2.university.name || "";
+        }
+        if (storedStep3?.semester) {
+            user.semester = storedStep3.semester;
+        }
 
         let semester = parseInt(user.semester, 10) || 1;
 
@@ -97,6 +114,16 @@ const pageLoader = initPageLoader({
         const bannerDetails = qs("#banner-details");
 
         const paginationContainer = qs("#partner-pagination");
+
+        function persistStep3State() {
+            if (!storage) return;
+            storage.setStepData(activeMatrikel, 'step3', {
+                selectedCourses: Array.from(selectedCourseIds),
+                semester,
+                partnerPage
+            });
+            storage.setLastMatrikel(activeMatrikel);
+        }
 
 
         // ============================================================
@@ -157,8 +184,18 @@ const pageLoader = initPageLoader({
             });
         }
 
-        let partnerPage = 1;
+        let partnerPage = storedStep3?.partnerPage || 1;
         const PARTNER_PAGE_SIZE = 8;
+        let selectedCourseIds = new Set((storedStep3?.selectedCourses || []).map(String));
+        let cachedPartnerCourses = [];
+        if (!selectedCourseIds.size) {
+            const selectedFromParams = params.get("selectedCourses");
+            if (selectedFromParams) {
+                try {
+                    selectedCourseIds = new Set(JSON.parse(selectedFromParams).map(String));
+                } catch (e) { /* ignore */ }
+            }
+        }
 
 
         // ============================================================
@@ -236,9 +273,7 @@ const pageLoader = initPageLoader({
             if (!list) return;
 
             list.innerHTML = "";
-            const selected = qsa(".partner-select").filter(cb => cb.checked);
-
-            if (selected.length === 0) {
+            if (!selectedCourseIds.size) {
                 const li = document.createElement("li");
                 li.textContent = "Keine Kurse ausgewählt";
                 li.style.opacity = "0.7";
@@ -247,26 +282,30 @@ const pageLoader = initPageLoader({
                 return;
             }
 
-            selected.forEach(cb => {
-                const row = cb.closest("tr");
-                const nameCell = row.querySelector("td");
+            const courseMap = cachedPartnerCourses.reduce((acc, course) => {
+                acc[String(course.id)] = course;
+                return acc;
+            }, {});
 
-                const plain = Array.from(nameCell.childNodes)
-                    .filter(n => n.nodeType === 3)
-                    .map(n => n.textContent.trim())
-                    .join(" ");
+            Array.from(selectedCourseIds).forEach(id => {
+                const course = courseMap[id];
+                const displayName = course?.name || `Kurs ${id}`;
 
                 const li = document.createElement("li");
 
                 const span = document.createElement("span");
-                span.textContent = plain;
+                span.textContent = displayName;
 
                 const remove = document.createElement("button");
                 remove.textContent = "✕";
                 remove.className = "remove-course";
                 remove.onclick = () => {
-                    cb.checked = false;
-                    cb.dispatchEvent(new Event("change", { bubbles: true }));
+                    selectedCourseIds.delete(String(id));
+                    qsa(`.partner-select[data-id="${id}"]`).forEach(cb => {
+                        cb.checked = false;
+                    });
+                    persistStep3State();
+                    updateECTS();
                 };
 
                 li.appendChild(span);
@@ -281,12 +320,10 @@ const pageLoader = initPageLoader({
         // ============================================================
         function updateECTS() {
             const required = parseFloat(ectsRequiredEl.textContent) || 30;
-            const selected = qsa(".partner-select").filter(cb => cb.checked);
-
-            const sum = selected.reduce(
-                (a, b) => a + parseFloat(b.dataset.ects || 0),
-                0
-            );
+            const sum = Array.from(selectedCourseIds).reduce((total, id) => {
+                const course = cachedPartnerCourses.find(c => String(c.id) === String(id));
+                return total + parseFloat(course?.ects || 0);
+            }, 0);
 
             partnerEctsEl.textContent = sum;
 
@@ -312,18 +349,20 @@ const pageLoader = initPageLoader({
             } else {
                 toStep4Btn.classList.add("disabled");
             }
-        }
 
-        const originalUpdateECTS = updateECTS;
-        updateECTS = function () {
-            originalUpdateECTS();
+            persistStep3State();
             refreshSelectedCoursesList();
-        };
+        }
 
 
         // ============================================================
         // 11) PARTNER-TABELLE MIT PAGINATION
         // ============================================================
+        function syncSelectionWithCourses(allCourses) {
+            const availableIds = new Set(allCourses.map(c => String(c.id)));
+            selectedCourseIds = new Set(Array.from(selectedCourseIds).filter(id => availableIds.has(String(id))));
+        }
+
         function renderPartnerPagination(total) {
             const totalPages = Math.ceil(total / PARTNER_PAGE_SIZE);
 
@@ -332,7 +371,9 @@ const pageLoader = initPageLoader({
             if (totalPages <= 1) return;
 
             const prev = document.createElement("button");
-            prev.textContent = "←";
+            prev.setAttribute("aria-label", "Vorherige Seite");
+            prev.className = "pagination-btn icon-only";
+            prev.innerHTML = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
             prev.disabled = partnerPage === 1;
             prev.onclick = () => {
                 partnerPage--;
@@ -340,7 +381,9 @@ const pageLoader = initPageLoader({
             };
 
             const next = document.createElement("button");
-            next.textContent = "→";
+            next.setAttribute("aria-label", "Nächste Seite");
+            next.className = "pagination-btn icon-only";
+            next.innerHTML = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
             next.disabled = partnerPage === totalPages;
             next.onclick = () => {
                 partnerPage++;
@@ -357,9 +400,13 @@ const pageLoader = initPageLoader({
 
         function renderPartnerTable() {
             const all = loadPartnerCourses();
+            cachedPartnerCourses = all;
+            syncSelectionWithCourses(all);
             partnerTbl.innerHTML = "";
 
             const total = all.length;
+            const totalPages = Math.max(1, Math.ceil(total / PARTNER_PAGE_SIZE));
+            if (partnerPage > totalPages) partnerPage = totalPages;
             const start = (partnerPage - 1) * PARTNER_PAGE_SIZE;
             const end = start + PARTNER_PAGE_SIZE;
 
@@ -373,7 +420,12 @@ const pageLoader = initPageLoader({
                 cb.dataset.id = c.id;
                 cb.dataset.ects = c.ects;
                 cb.className = "partner-select";
-                cb.onchange = updateECTS;
+                cb.checked = selectedCourseIds.has(String(c.id));
+                cb.onchange = () => {
+                    if (cb.checked) selectedCourseIds.add(String(c.id));
+                    else selectedCourseIds.delete(String(c.id));
+                    updateECTS();
+                };
 
                 tr.innerHTML = `
                     <td data-label="Kurs">${c.name}</td>
@@ -427,13 +479,12 @@ const pageLoader = initPageLoader({
                 return;
             }
 
-            const selected = qsa(".partner-select")
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.id);
+            const selected = Array.from(selectedCourseIds);
 
             const newParams = new URLSearchParams(window.location.search);
             newParams.set("selectedCourses", JSON.stringify(selected));
 
+            persistStep3State();
             window.location.href = "./step4.html?" + newParams.toString();
         });
 
@@ -462,6 +513,7 @@ const pageLoader = initPageLoader({
                 partnerPage = 1;
                 renderDHBWTable();
                 renderPartnerTable();
+                persistStep3State();
             }
         });
 

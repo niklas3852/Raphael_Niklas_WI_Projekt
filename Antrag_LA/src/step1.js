@@ -20,6 +20,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateRangeInput = document.getElementById("date-range-picker");
 
+    const storage = window.storageManager;
+    const STEP_ID = 'step1';
+    const lastMatrikel = storage?.getLastMatrikel ? storage.getLastMatrikel() : 'guest';
+
+    const savedStepData = storage?.getStepData ? storage.getStepData(lastMatrikel, STEP_ID) : null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramData = {
+        vorname: urlParams.get('vorname') || '',
+        nachname: urlParams.get('nachname') || '',
+        matrikel: urlParams.get('matrikel') || '',
+        kurs: urlParams.get('kurs') || '',
+        studiengang: urlParams.get('studiengang') || '',
+        semester: urlParams.get('semester') || '',
+        vertiefung: urlParams.get('vertiefung') || '',
+        studiengangsleitung: urlParams.get('studiengangsleitung') || '',
+        zeitraum: urlParams.get('zeitraum') || ''
+    };
+    const initialData = savedStepData || paramData;
+
+    function collectFormData() {
+        return {
+            vorname: vorname?.value.trim() || "",
+            nachname: nachname?.value.trim() || "",
+            matrikel: matrikel?.value.trim() || "",
+            kurs: kurs?.value.trim() || "",
+            studiengang: studiengang?.value || "",
+            semester: semester?.value || "",
+            vertiefung: vertiefungSelect?.value || "",
+            studiengangsleitung: studiengangsleitung?.value.trim() || "",
+            zeitraum: dateRangeInput?.value.trim() || ""
+        };
+    }
+
+    function persistFormData() {
+        if (!storage) return;
+        const payload = collectFormData();
+        const activeMatrikel = payload.matrikel || lastMatrikel;
+        storage.setStepData(activeMatrikel, STEP_ID, payload);
+        storage.setLastMatrikel(activeMatrikel);
+    }
+
+    function hydrateFormFromData(data) {
+        if (!data) return;
+        if (vorname && data.vorname) vorname.value = data.vorname;
+        if (nachname && data.nachname) nachname.value = data.nachname;
+        if (matrikel && data.matrikel) matrikel.value = data.matrikel;
+        if (kurs && data.kurs) kurs.value = data.kurs;
+        if (semester && data.semester) semester.value = data.semester;
+        if (studiengangsleitung && data.studiengangsleitung) studiengangsleitung.value = data.studiengangsleitung;
+        if (dateRangeInput && data.zeitraum) dateRangeInput.value = data.zeitraum;
+    }
+
 
     // =====================================================
     //   WICHTIG: ALLE AUTO-FILL / Speicherung entfernen!
@@ -77,9 +129,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (studiengang) {
         studiengang.addEventListener("change", updateVertiefungOptions);
-        populateStudiengangOptions().then(updateVertiefungOptions);
+        populateStudiengangOptions().then(() => {
+            if (initialData.studiengang) studiengang.value = initialData.studiengang;
+            updateVertiefungOptions().then(() => {
+                if (initialData.vertiefung) vertiefungSelect.value = initialData.vertiefung;
+            });
+        });
     }
 
+
+    hydrateFormFromData(initialData);
 
     // =====================================================
     //   DATUMS-PICKER
@@ -95,11 +154,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 picker.on("selected", (d1, d2) => {
                     if (d1 && d2) {
                         dateRangeInput.value = `${d1.format("DD.MM.YYYY")} - ${d2.format("DD.MM.YYYY")}`;
+                        persistFormData();
                     }
                 });
             }
         });
     }
+
+    [vorname, nachname, matrikel, kurs, studiengangsleitung, dateRangeInput].forEach(el => {
+        el?.addEventListener("input", persistFormData);
+    });
+    [studiengang, semester, vertiefungSelect].forEach(el => {
+        el?.addEventListener("change", persistFormData);
+    });
 
 
     // =====================================================
@@ -108,16 +175,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildUrlParams() {
         const params = new URLSearchParams();
+        const data = collectFormData();
 
-        params.set("vorname", vorname?.value.trim() || "");
-        params.set("nachname", nachname?.value.trim() || "");
-        params.set("matrikel", matrikel?.value.trim() || "");
-        params.set("kurs", kurs?.value.trim() || "");
-        params.set("studiengang", studiengang?.value || "");
-        params.set("semester", semester?.value || "");
-        params.set("vertiefung", vertiefungSelect?.value || "");
-        params.set("studiengangsleitung", studiengangsleitung?.value.trim() || "");
-        params.set("zeitraum", dateRangeInput?.value.trim() || "");
+        Object.entries({
+            vorname: data.vorname,
+            nachname: data.nachname,
+            matrikel: data.matrikel,
+            kurs: data.kurs,
+            studiengang: data.studiengang,
+            semester: data.semester,
+            vertiefung: data.vertiefung,
+            studiengangsleitung: data.studiengangsleitung,
+            zeitraum: data.zeitraum
+        }).forEach(([key, value]) => params.set(key, value || ""));
 
         return params.toString();
     }
@@ -135,6 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 form.reportValidity();
                 return;
             }
+
+            persistFormData();
 
             const baseHref = nextBtn.getAttribute("href") || "./step2.html";
             const finalUrl = `${baseHref}?${buildUrlParams()}`;

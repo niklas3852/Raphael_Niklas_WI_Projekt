@@ -31,7 +31,7 @@ const pageLoader = initPageLoader({
         // ----------------------------------------------------------
         const params = new URLSearchParams(window.location.search);
 
-        const user = {
+        let user = {
             vorname: params.get("vorname") || "",
             nachname: params.get("nachname") || "",
             matrikel: params.get("matrikel") || "",
@@ -43,8 +43,26 @@ const pageLoader = initPageLoader({
             studiengangsleitung: params.get("studiengangsleitung") || "",
             university: params.get("university") || "",
             universityId: params.get("universityId") || "",
-            selectedCourses: JSON.parse(params.get("selectedCourses") || "[]")
+            selectedCourses: []
         };
+
+        try {
+            user.selectedCourses = JSON.parse(params.get("selectedCourses") || "[]");
+        } catch (e) { user.selectedCourses = []; }
+
+        const storage = window.storageManager;
+        const activeMatrikel = user.matrikel || storage?.getLastMatrikel?.() || "guest";
+        const storedStep1 = storage?.getStepData(activeMatrikel, 'step1');
+        const storedStep2 = storage?.getStepData(activeMatrikel, 'step2');
+        const storedStep3 = storage?.getStepData(activeMatrikel, 'step3');
+
+        if (storedStep1) user = { ...user, ...storedStep1 };
+        if (storedStep2?.university) {
+            user.university = storedStep2.university.name || storedStep2.university;
+            user.universityId = storedStep2.university.id || storedStep2.university.name || "";
+        }
+        if (storedStep3?.selectedCourses?.length) user.selectedCourses = storedStep3.selectedCourses;
+        if (storedStep3?.semester) user.semester = storedStep3.semester;
 
         const semester = String(user.semester);
 
@@ -370,7 +388,20 @@ const pageLoader = initPageLoader({
         // E-Mail Teilen
         // ----------------------------------------------------------
         qs("#share-pdf")?.addEventListener("click", () => {
-            window.location.href = "mailto:?subject=Learning Agreement&body=Hier ist mein Learning Agreement.";
+            const subject = `Learning Agreement – ${user.vorname} ${user.nachname}`.trim();
+            const body = [
+                "Hallo,",
+                "",
+                "hier sind die wichtigsten Angaben zu meinem Learning Agreement:",
+                `Gastuniversität: ${partner.name}`,
+                `Zeitraum: ${user.zeitraum || 'nicht angegeben'}`,
+                `Studiengang: ${user.studiengang || '—'} (Semester ${user.semester})`,
+                "",
+                "PDF-Vorschau findest du hier:",
+                window.location.href
+            ].join("\n");
+
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         });
 
         // ----------------------------------------------------------

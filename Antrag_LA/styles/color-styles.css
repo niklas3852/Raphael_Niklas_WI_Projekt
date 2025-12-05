@@ -1,15 +1,34 @@
 :root {
-    --background-color: #ffecec;
-    --red-heading: indianred;
-    --black-heading: black;
-    --black-general-writing: black;
+    --background-color: #f7f5ff;
+    --red-heading: #c53030;
+    --black-heading: #0f172a;
+    --black-general-writing: #111827;
 
-    --timeline-label: #fff;
-    --timeline-item-deactivated: #bbb;
-    --timeline-line: #ff6a6a;
+    --timeline-label: #0f172a;
+    --timeline-item-deactivated: #e5e7eb;
+    --timeline-line: #7c3aed;
     --timeline-dot: #fff;
-    --timeline-dot-border: white;
-    --timeline-dot-active: white;
-    --timeline-dot-svg: #ff6a6a;
-    --timeline-dot-deactivated: ghostwhite;
+    --timeline-dot-border: #7c3aed;
+    --timeline-dot-active: #7c3aed;
+    --timeline-dot-svg: #0f172a;
+    --timeline-dot-deactivated: #e5e7eb;
+}
+
+body.theme-dark {
+    --background-color: #0b1224;
+    --color-bg: #0b1224;
+    --color-surface: #111827;
+    --color-border: #1f2937;
+    --color-text: #e2e8f0;
+    --color-muted: #cbd5e1;
+    --color-inverse: #f8fafc;
+
+    --timeline-label: #e2e8f0;
+    --timeline-item-deactivated: #1f2937;
+    --timeline-line: #38bdf8;
+    --timeline-dot: #0b1224;
+    --timeline-dot-border: #38bdf8;
+    --timeline-dot-active: #38bdf8;
+    --timeline-dot-svg: #e2e8f0;
+    --timeline-dot-deactivated: #111827;
 }
