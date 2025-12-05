@@ -32,29 +32,52 @@ document.addEventListener("DOMContentLoaded", () => {
     //   STUDIENGANG → VERTIEFUNG LOGIK
     // =====================================================
 
-    function updateVertiefungOptions() {
+    async function getDhbwDefinitions() {
+        if (window.dhbwCourses) return window.dhbwCourses;
+        if (window.dhbwCoursesPromise) {
+            window.dhbwCourses = await window.dhbwCoursesPromise;
+            return window.dhbwCourses;
+        }
+        return {};
+    }
+
+    async function populateStudiengangOptions() {
+        if (!studiengang) return;
+
+        const defs = await getDhbwDefinitions();
+        studiengang.innerHTML = `<option value="" disabled selected>Studiengang*</option>`;
+
+        Object.entries(defs).forEach(([key, def]) => {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = def.name || key;
+            studiengang.appendChild(option);
+        });
+    }
+
+    async function updateVertiefungOptions() {
         vertiefungSelect.innerHTML = `<option value="">Bitte wählen...</option>`;
 
         const sg = studiengang.value;
-        if (!sg || !window.dhbwCourses || !window.dhbwCourses[sg]) {
-            vertiefungSelect.disabled = true;
-            return;
-        }
+        const defs = await getDhbwDefinitions();
+        const sgDef = defs[sg];
+        const vertiefungen = sgDef?.vertiefungen || {};
 
-        const vers = window.dhbwCourses[sg].semesters.vertiefungen || [];
-        vertiefungSelect.disabled = false;
+        const entries = Object.values(vertiefungen);
+        vertiefungSelect.disabled = entries.length === 0;
+        if (vertiefungSelect.disabled) return;
 
-        vers.forEach(v => {
+        entries.forEach(v => {
             const o = document.createElement("option");
-            o.value = v.value || v;
-            o.textContent = v.label || v;
+            o.value = v.code;
+            o.textContent = v.name;
             vertiefungSelect.appendChild(o);
         });
     }
 
     if (studiengang) {
         studiengang.addEventListener("change", updateVertiefungOptions);
-        updateVertiefungOptions();
+        populateStudiengangOptions().then(updateVertiefungOptions);
     }
 
 
