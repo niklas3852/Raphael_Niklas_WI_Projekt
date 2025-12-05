@@ -72,8 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return acc;
         }, {});
 
-        const courseListPromise = window.getDhbwCourseList ? window.getDhbwCourseList() : window.dhbwCourses || [];
-        const dhbwCourseList = await Promise.resolve(courseListPromise);
+        let dhbwCourseList = [];
+        try {
+            dhbwCourseList = await (window.dhbwApi?.fetchCourses?.() || Promise.resolve([]));
+        } catch (error) {
+            console.error("DHBW-Kurse konnten nicht geladen werden:", error);
+            dhbwCourseList = [];
+        }
 
         const partnerDefs = window.compatibleCourses || {};
 
@@ -92,15 +97,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!partnerKey) partnerKey = Object.keys(partnerDefs)[0];
 
-        const partner = partnerDefs[partnerKey];
-        const partnerCourses = partner.semesters?.[semester] || [];
+        const partner = partnerDefs[partnerKey] || { name: user.university || "Unbekannte Gastuni", courses: [] };
+        function partnerCourseMatches(course) {
+            const semesterMatch = String(course.semester) === String(semester);
+            if (!semesterMatch) return false;
+
+            const compatList = Array.isArray(course.compatible) ? course.compatible : [];
+            if (!compatList.length) return true;
+
+            return compatList.some(c =>
+                c.studiengang === user.studiengang &&
+                (!user.vertiefung || c.vertiefung === user.vertiefung)
+            );
+        }
+
+        const partnerCourses = (partner.courses || []).filter(partnerCourseMatches);
 
         // ----------------------------------------------------------
         // 4) DHBW MODULE LADEN
         // ----------------------------------------------------------
         const dhbwModules = dhbwCourseList.filter(c =>
-            c.programId === user.studiengang &&
-            (!user.vertiefung || c.vertiefungId === user.vertiefung) &&
+            c.studiengang === user.studiengang &&
+            (!user.vertiefung || c.vertiefung === user.vertiefung) &&
             String(c.semester) === semester
         );
 
@@ -162,6 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // ----------------------------------------------------------
         // 7) HELFER
         // ----------------------------------------------------------
+        const vertiefungName = (studiengangMap[user.studiengang]?.vertiefungen || []).find(v => v.id === user.vertiefung)?.name || user.vertiefung;
+
         function metaCell(de, en, value) {
             return `
                 <div class="meta-item">
@@ -213,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         ${metaCell("Name Studierender", "Name of student", `${user.vorname} ${user.nachname}`)}
                         ${metaCell("Kurs", "Study group", user.kurs)}
                         ${metaCell("Studiengang", "Department", studiengangMap[user.studiengang]?.name || user.studiengang)}
-                        ${metaCell("Vertiefung", "Specialisation", user.vertiefung)}
+                        ${metaCell("Vertiefung", "Specialisation", vertiefungName)}
                     </div>
                 </div>
             `;

@@ -66,7 +66,7 @@ import { cities } from "../db/university_data/cities.js";
 
         if (!partnerKey) partnerKey = Object.keys(partnerDefs)[0] || null;
 
-        const partner = partnerDefs[partnerKey];
+        const partner = partnerDefs[partnerKey] || { name: user.university || "Gastuniversität", courses: [] };
 
 
         // ============================================================
@@ -115,25 +115,46 @@ import { cities } from "../db/university_data/cities.js";
 
 
         // ============================================================
-        // 6) DHBW-Kurse
+        // 6) DHBW-Kurse (API-basiert)
         // ============================================================
+        let dhbwLoadError = null;
         async function loadDHBWCourses() {
-            const listPromise = window.getDhbwCourseList ? window.getDhbwCourseList() : window.dhbwCourses || [];
-            const allCourses = await Promise.resolve(listPromise);
+            try {
+                const allCourses = await (window.dhbwApi?.fetchCourses?.() || Promise.resolve([]));
+                dhbwLoadError = null;
 
-            return allCourses.filter(c =>
-                c.programId === studiengangId &&
-                (!user.vertiefung || c.vertiefungId === user.vertiefung) &&
-                String(c.semester) === String(semester)
-            );
+                return allCourses.filter(c =>
+                    c.studiengang === studiengangId &&
+                    (!user.vertiefung || c.vertiefung === user.vertiefung) &&
+                    String(c.semester) === String(semester)
+                );
+            } catch (error) {
+                dhbwLoadError = error;
+                console.error("DHBW-Kurse konnten nicht geladen werden:", error);
+                return [];
+            }
         }
 
 
         // ============================================================
         // 7) Partner-Kurse (für Pagination)
         // ============================================================
+        function partnerCourseMatches(course) {
+            const semesterMatch = String(course.semester) === String(semester);
+            if (!semesterMatch) return false;
+
+            const compatList = Array.isArray(course.compatible) ? course.compatible : [];
+            if (!compatList.length) return true;
+
+            return compatList.some(c =>
+                c.studiengang === studiengangId &&
+                (!user.vertiefung || c.vertiefung === user.vertiefung)
+            );
+        }
+
         function loadPartnerCourses() {
-            return partner?.semesters?.[String(semester)] || [];
+            const all = partner?.courses || [];
+            return all.filter(partnerCourseMatches);
         }
 
         let partnerPage = 1;
@@ -378,6 +399,14 @@ import { cities } from "../db/university_data/cities.js";
             partnerTbl.innerHTML = "";
 
             const total = all.length;
+            if (!total) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td colspan="4" style="text-align:left">Keine passenden Kurse für Semester ${semester} gefunden.</td>`;
+                partnerTbl.appendChild(tr);
+                renderPartnerPagination(0);
+                updateECTS();
+                return;
+            }
             const start = (partnerPage - 1) * PARTNER_PAGE_SIZE;
             const end = start + PARTNER_PAGE_SIZE;
 
@@ -418,6 +447,24 @@ import { cities } from "../db/university_data/cities.js";
         async function renderDHBWTable() {
             const dhbwCourses = await loadDHBWCourses();
             dhbwTbl.innerHTML = "";
+
+            if (dhbwLoadError) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td colspan="3" style="text-align:left">DHBW-Kurse konnten nicht geladen werden. Bitte später erneut versuchen.</td>`;
+                dhbwTbl.appendChild(tr);
+                return;
+            }
+
+            if (!dhbwCourses.length) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td colspan="3" style="text-align:left">Keine Heimatkurse für die aktuelle Auswahl gefunden.</td>`;
+                dhbwTbl.appendChild(tr);
+                dhbwEctsEl.textContent = 0;
+                ectsRequiredEl.textContent = 0;
+                if (ectsRequiredDup) ectsRequiredDup.textContent = 0;
+                updateECTS();
+                return;
+            }
 
             let sum = 0;
             dhbwCourses.forEach(c => {
