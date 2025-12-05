@@ -41,23 +41,6 @@ const pageLoader = initPageLoader({
             universityId: params.get("universityId") || ""
         };
 
-        const storage = window.storageManager;
-        const activeMatrikel = user.matrikel || storage?.getLastMatrikel?.() || "guest";
-        const storedStep1 = storage?.getStepData(activeMatrikel, 'step1');
-        const storedStep2 = storage?.getStepData(activeMatrikel, 'step2');
-        const storedStep3 = storage?.getStepData(activeMatrikel, 'step3');
-
-        if (storedStep1) {
-            user = { ...user, ...storedStep1 };
-        }
-        if (storedStep2?.university) {
-            user.university = storedStep2.university.name || storedStep2.university;
-            user.universityId = storedStep2.university.id || storedStep2.university.name || "";
-        }
-        if (storedStep3?.semester) {
-            user.semester = storedStep3.semester;
-        }
-
         let semester = parseInt(user.semester, 10) || 1;
 
 
@@ -116,13 +99,13 @@ const pageLoader = initPageLoader({
         const paginationContainer = qs("#partner-pagination");
 
         function persistStep3State() {
-            if (!storage) return;
-            storage.setStepData(activeMatrikel, 'step3', {
-                selectedCourses: Array.from(selectedCourseIds),
-                semester,
-                partnerPage
-            });
-            storage.setLastMatrikel(activeMatrikel);
+            const updatedParams = new URLSearchParams(window.location.search);
+            updatedParams.set('semester', String(semester));
+            updatedParams.set('partnerPage', String(partnerPage));
+            updatedParams.set('selectedCourses', JSON.stringify(Array.from(selectedCourseIds)));
+
+            const newUrl = `${window.location.pathname}?${updatedParams.toString()}`;
+            window.history.replaceState({}, '', newUrl);
         }
 
 
@@ -184,17 +167,15 @@ const pageLoader = initPageLoader({
             });
         }
 
-        let partnerPage = storedStep3?.partnerPage || 1;
+        let partnerPage = parseInt(params.get("partnerPage") || "1", 10) || 1;
         const PARTNER_PAGE_SIZE = 8;
-        let selectedCourseIds = new Set((storedStep3?.selectedCourses || []).map(String));
+        let selectedCourseIds = new Set();
         let cachedPartnerCourses = [];
-        if (!selectedCourseIds.size) {
-            const selectedFromParams = params.get("selectedCourses");
-            if (selectedFromParams) {
-                try {
-                    selectedCourseIds = new Set(JSON.parse(selectedFromParams).map(String));
-                } catch (e) { /* ignore */ }
-            }
+        const selectedFromParams = params.get("selectedCourses");
+        if (selectedFromParams) {
+            try {
+                selectedCourseIds = new Set(JSON.parse(selectedFromParams).map(String));
+            } catch (e) { /* ignore */ }
         }
 
 

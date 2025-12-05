@@ -24,16 +24,6 @@ paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
 
 const params = new URLSearchParams(window.location.search);
-const storage = window.storageManager;
-const STEP1_ID = 'step1';
-const STEP2_ID = 'step2';
-const lastMatrikel = storage?.getLastMatrikel?.() || 'guest';
-const storedStep1 = storage?.getStepData(lastMatrikel, STEP1_ID) || {};
-const storedStep2 = storage?.getStepData(lastMatrikel, STEP2_ID) || {};
-
-function getActiveMatrikel() {
-    return storedStep1.matrikel || lastMatrikel;
-}
 
 const continentWrapper = document.createElement("div");
 continentWrapper.id = "continent-result-wrapper";
@@ -71,20 +61,8 @@ let activeContinent = null;
 const ROWS_PER_PAGE = 2;
 
 function appendStoredUserParams(targetParams) {
-    if (!storage) return;
-    const base = storage.getStepData(getActiveMatrikel(), STEP1_ID) || {};
-
-    Object.entries({
-        vorname: base.vorname,
-        nachname: base.nachname,
-        matrikel: base.matrikel,
-        kurs: base.kurs,
-        studiengang: base.studiengang,
-        semester: base.semester,
-        vertiefung: base.vertiefung,
-        studiengangsleitung: base.studiengangsleitung,
-        zeitraum: base.zeitraum
-    }).forEach(([key, value]) => targetParams.set(key, value || ''));
+    const keys = ['vorname', 'nachname', 'matrikel', 'kurs', 'studiengang', 'semester', 'vertiefung', 'studiengangsleitung', 'zeitraum'];
+    keys.forEach(key => targetParams.set(key, params.get(key) || ''));
 }
 
 let activePage = 1;
@@ -526,18 +504,6 @@ function selectUniversity(city) {
         continueBtn.textContent = `Fortfahren mit der ${city.name}`;
     }
 
-    if (storage) {
-        const currentMatrikel = getActiveMatrikel();
-        const snapshot = {
-            id: city.id || city.name,
-            name: city.name,
-            country: city.country || '',
-            continent: city.continent || ''
-        };
-        storage.setStepData(currentMatrikel, STEP2_ID, { university: snapshot });
-        storage.setLastMatrikel(currentMatrikel);
-    }
-
     // ----------------------------------------------------
     // URL-Parameter auslesen
     // ----------------------------------------------------
@@ -681,16 +647,17 @@ function createCarouselControls() {
     }
 }
 
-function restoreSelectionFromStorage() {
-    if (!storedStep2?.university) return;
-    const saved = storedStep2.university;
-    const match = cities.find(c => c.id === saved.id || c.name === saved.name);
+function restoreSelectionFromParams() {
+    const savedId = params.get('universityId');
+    const savedName = params.get('university');
+    if (!savedId && !savedName) return;
+    const match = cities.find(c => (savedId && c.id === savedId) || c.name === savedName);
     if (match) showCityInfo(match);
 }
 // ------------------- INIT -------------------
 renderCities();
 renderContinents();
 setupGlobalCarousel();
-restoreSelectionFromStorage();
+restoreSelectionFromParams();
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
