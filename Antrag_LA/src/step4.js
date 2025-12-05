@@ -29,6 +29,35 @@
             selectedCourses: JSON.parse(params.get("selectedCourses") || "[]")
         };
 
+        const savedStep1 = window.storageManager?.getStep?.('step1') || {};
+        const savedStep2 = window.storageManager?.getStep?.('step2') || {};
+        const savedStep3 = window.storageManager?.getStep?.('step3') || {};
+
+        Object.entries({
+            vorname: savedStep1.vorname,
+            nachname: savedStep1.nachname,
+            matrikel: savedStep1.matrikel,
+            kurs: savedStep1.kurs,
+            studiengang: savedStep1.studiengang,
+            semester: savedStep1.semester,
+            vertiefung: savedStep1.vertiefung,
+            zeitraum: savedStep1.zeitraum,
+            studiengangsleitung: savedStep1.studiengangsleitung,
+        }).forEach(([key, value]) => {
+            if (!user[key] && value) user[key] = value;
+        });
+
+        if (!user.university && savedStep2?.selectedUniversity?.name) {
+            user.university = savedStep2.selectedUniversity.name;
+            user.universityId = savedStep2.selectedUniversity.id || user.universityId;
+        }
+
+        if (!user.selectedCourses?.length && Array.isArray(savedStep3.selectedCourses)) {
+            user.selectedCourses = savedStep3.selectedCourses;
+        }
+
+        user.semester = String(user.semester || savedStep1.semester || savedStep3.semester || "1");
+
         const semester = String(user.semester);
 
         // ----------------------------------------------------------
@@ -298,6 +327,21 @@
 
         renderLA();
 
+        function buildMailtoLink() {
+            const subject = encodeURIComponent(`Learning Agreement - ${`${user.vorname} ${user.nachname}`.trim()}`);
+            const bodyLines = [
+                'Hallo,',
+                '',
+                `hier ist mein Learning Agreement für ${partner?.name || user.university || 'meine Gasthochschule'}.`,
+                `Studiengang: ${dhbwDefs[user.studiengang]?.name || user.studiengang || 'n/a'}`,
+                `Zeitraum: ${user.zeitraum || 'n/a'}`,
+                `ECTS Partnerkurse: ${result?.totals?.partner ?? 'n/a'}`
+            ];
+
+            const body = encodeURIComponent(bodyLines.join('\n'));
+            return `mailto:?subject=${subject}&body=${body}`;
+        }
+
         // ----------------------------------------------------------
         // 9) PDF DOWNLOAD
         // ----------------------------------------------------------
@@ -328,7 +372,7 @@
         // E-Mail Teilen
         // ----------------------------------------------------------
         qs("#share-pdf")?.addEventListener("click", () => {
-            window.location.href = "mailto:?subject=Learning Agreement&body=Hier ist mein Learning Agreement.";
+            window.location.href = buildMailtoLink();
         });
 
         // ----------------------------------------------------------
