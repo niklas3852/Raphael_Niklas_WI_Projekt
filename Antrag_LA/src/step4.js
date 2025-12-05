@@ -1,9 +1,10 @@
 // =======================================================
-// STEP 4 – Learning Agreement Vorschau (URL-basierte Daten)
+// STEP 4 – Learning Agreement Vorschau (State-basiert)
 // Behält 100% das Layout der alten Version bei!
 // =======================================================
 
 import { initPageLoader, waitForImages } from "./loading-overlay.js";
+import { loadState } from "./shared-state.js";
 
 const pageLoader = initPageLoader({
     message: "Wir erstellen deine Vorschau...",
@@ -27,29 +28,26 @@ const pageLoader = initPageLoader({
     document.addEventListener("DOMContentLoaded", async () => {
 
         // ----------------------------------------------------------
-        // 1) URL PARAMETER LADEN
+        // 1) STATE LADEN
         // ----------------------------------------------------------
-        const params = new URLSearchParams(window.location.search);
+        const state = loadState();
+        const step1Data = state.step1Data || {};
+        const step3State = state.step3 || {};
 
         let user = {
-            vorname: params.get("vorname") || "",
-            nachname: params.get("nachname") || "",
-            matrikel: params.get("matrikel") || "",
-            kurs: params.get("kurs") || "",
-            studiengang: params.get("studiengang") || "",
-            semester: params.get("semester") || "1",
-            vertiefung: params.get("vertiefung") || "",
-            zeitraum: params.get("zeitraum") || "",
-            studiengangsleitung: params.get("studiengangsleitung") || "",
-            university: params.get("university") || "",
-            universityId: params.get("universityId") || "",
-            selectedCourses: []
+            vorname: step1Data.vorname || "",
+            nachname: step1Data.nachname || "",
+            matrikel: step1Data.matrikel || "",
+            kurs: step1Data.kurs || "",
+            studiengang: step1Data.studiengang || "",
+            semester: step3State.semester || step1Data.semester || "1",
+            vertiefung: step1Data.vertiefung || "",
+            zeitraum: step1Data.zeitraum || "",
+            studiengangsleitung: step1Data.studiengangsleitung || "",
+            university: state.selectedUniversity?.name || "",
+            universityId: state.selectedUniversity?.id || "",
+            selectedCourses: step3State.selectedCourses || []
         };
-
-        try {
-            const storedCourses = storedStep3.selectedCourses || [];
-            user.selectedCourses = JSON.parse(params.get("selectedCourses") || JSON.stringify(storedCourses));
-        } catch (e) { user.selectedCourses = []; }
 
         const semester = String(user.semester);
 
