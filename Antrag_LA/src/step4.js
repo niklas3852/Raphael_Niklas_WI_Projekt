@@ -7,7 +7,9 @@
 
     function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
 
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
+
+    (async () => {
 
         // ----------------------------------------------------------
         // 1) URL PARAMETER LADEN
@@ -63,7 +65,15 @@
         // ----------------------------------------------------------
         // 2) DATENBANKEN LADEN
         // ----------------------------------------------------------
-        const dhbwDefs = window.dhbwCourses || {};
+        const studiengaenge = Array.isArray(window.dhbwStudiengaenge) ? window.dhbwStudiengaenge : [];
+        const studiengangMap = studiengaenge.reduce((acc, sg) => {
+            acc[sg.id] = sg;
+            return acc;
+        }, {});
+
+        const courseListPromise = window.getDhbwCourseList ? window.getDhbwCourseList() : window.dhbwCourses || [];
+        const dhbwCourseList = await Promise.resolve(courseListPromise);
+
         const partnerDefs = window.compatibleCourses || {};
 
         // ----------------------------------------------------------
@@ -87,8 +97,11 @@
         // ----------------------------------------------------------
         // 4) DHBW MODULE LADEN
         // ----------------------------------------------------------
-        const dhbwModules =
-            dhbwDefs[user.studiengang]?.semesters?.[semester] || [];
+        const dhbwModules = dhbwCourseList.filter(c =>
+            c.programId === user.studiengang &&
+            (!user.vertiefung || c.vertiefungId === user.vertiefung) &&
+            String(c.semester) === semester
+        );
 
         // ----------------------------------------------------------
         // 5) PARTNER-MAPPING ERSTELLEN
@@ -198,7 +211,7 @@
                     <div class="la-meta-col">
                         ${metaCell("Name Studierender", "Name of student", `${user.vorname} ${user.nachname}`)}
                         ${metaCell("Kurs", "Study group", user.kurs)}
-                        ${metaCell("Studiengang", "Department", dhbwDefs[user.studiengang]?.name || user.studiengang)}
+                        ${metaCell("Studiengang", "Department", studiengangMap[user.studiengang]?.name || user.studiengang)}
                         ${metaCell("Vertiefung", "Specialisation", user.vertiefung)}
                     </div>
                 </div>
@@ -333,7 +346,7 @@
                 'Hallo,',
                 '',
                 `hier ist mein Learning Agreement für ${partner?.name || user.university || 'meine Gasthochschule'}.`,
-                `Studiengang: ${dhbwDefs[user.studiengang]?.name || user.studiengang || 'n/a'}`,
+                `Studiengang: ${studiengangMap[user.studiengang]?.name || user.studiengang || 'n/a'}`,
                 `Zeitraum: ${user.zeitraum || 'n/a'}`,
                 `ECTS Partnerkurse: ${result?.totals?.partner ?? 'n/a'}`
             ];
@@ -452,6 +465,8 @@
             window.location.href = `./step3.html?${currentParams.toString()}`;
         });
 
-    });
+    })();
+
+});
 
 })();
