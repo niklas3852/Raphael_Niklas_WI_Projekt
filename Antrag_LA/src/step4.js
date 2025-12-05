@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // ----------------------------------------------------------
         // 1) URL PARAMETER LADEN
         // ----------------------------------------------------------
-        const params = new URLSearchParams(window.location.search);
+        const params = window.urlState?.getParams ? window.urlState.getParams() : new URLSearchParams(window.location.search);
 
         const user = {
             vorname: params.get("vorname") || "",
@@ -31,34 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedCourses: JSON.parse(params.get("selectedCourses") || "[]")
         };
 
-        const savedStep1 = window.storageManager?.getStep?.('step1') || {};
-        const savedStep2 = window.storageManager?.getStep?.('step2') || {};
-        const savedStep3 = window.storageManager?.getStep?.('step3') || {};
-
-        Object.entries({
-            vorname: savedStep1.vorname,
-            nachname: savedStep1.nachname,
-            matrikel: savedStep1.matrikel,
-            kurs: savedStep1.kurs,
-            studiengang: savedStep1.studiengang,
-            semester: savedStep1.semester,
-            vertiefung: savedStep1.vertiefung,
-            zeitraum: savedStep1.zeitraum,
-            studiengangsleitung: savedStep1.studiengangsleitung,
-        }).forEach(([key, value]) => {
-            if (!user[key] && value) user[key] = value;
-        });
-
-        if (!user.university && savedStep2?.selectedUniversity?.name) {
-            user.university = savedStep2.selectedUniversity.name;
-            user.universityId = savedStep2.selectedUniversity.id || user.universityId;
-        }
-
-        if (!user.selectedCourses?.length && Array.isArray(savedStep3.selectedCourses)) {
-            user.selectedCourses = savedStep3.selectedCourses;
-        }
-
-        user.semester = String(user.semester || savedStep1.semester || savedStep3.semester || "1");
+        user.semester = String(user.semester || "1");
 
         const semester = String(user.semester);
 
