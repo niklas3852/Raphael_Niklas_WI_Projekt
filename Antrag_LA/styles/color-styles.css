@@ -15,13 +15,16 @@
 }
 
 body.theme-dark {
-    --background-color: #0b1224;
-    --color-bg: #0b1224;
-    --color-surface: #111827;
-    --color-border: #1f2937;
-    --color-text: #e2e8f0;
+    --background-color: #0b1120;
+    --color-bg: #0b1120;
+    --color-surface: #0f172a;
+    --color-border: #1e293b;
+    --color-text: #f1f5f9;
     --color-muted: #cbd5e1;
     --color-inverse: #f8fafc;
+    --color-primary: #38bdf8;
+    --color-primary-600: #0284c7;
+    --color-primary-700: #0369a1;
 
     --timeline-label: #e2e8f0;
     --timeline-item-deactivated: #1f2937;

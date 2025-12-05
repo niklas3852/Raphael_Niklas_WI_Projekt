@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateRangeInput = document.getElementById("date-range-picker");
 
+    const storage = window.laStorage;
     const urlParams = new URLSearchParams(window.location.search);
     const paramData = {
         vorname: urlParams.get('vorname') || '',
@@ -32,13 +33,21 @@ document.addEventListener("DOMContentLoaded", () => {
         studiengangsleitung: urlParams.get('studiengangsleitung') || '',
         zeitraum: urlParams.get('zeitraum') || ''
     };
-    const initialData = paramData;
+    const storedData = (storage?.getSection?.('step1')) || {};
+    const initialData = { ...storedData, ...paramData };
 
+    const matrikelError = document.getElementById("matrikel-error");
+
+    /**
+     * Erzwingt eine reine Zifferneingabe für die Matrikelnummer und kommuniziert Fehler barrierefrei.
+     * Gleichzeitig wird der aktuelle Wert sofort in den Storage geschrieben, damit ein Reload keine Daten verliert.
+     */
     function setupMatrikelInput() {
         if (!matrikel) return;
 
         matrikel.setAttribute("inputmode", "numeric");
         matrikel.setAttribute("pattern", "[0-9]*");
+        matrikel.setAttribute("type", "number");
 
         const sanitize = () => {
             const digitsOnly = matrikel.value.replace(/\D+/g, "");
@@ -47,7 +56,22 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
 
-        // Blockiere nicht-numerische Eingaben direkt
+        const validateMatrikel = () => {
+            const value = matrikel.value.trim();
+            const digitsOnly = /^\d+$/.test(value);
+
+            if (!value) {
+                matrikel.setCustomValidity('Bitte Matrikelnummer eingeben.');
+                if (matrikelError) matrikelError.textContent = 'Dieses Pflichtfeld darf nicht leer sein.';
+            } else if (!digitsOnly) {
+                matrikel.setCustomValidity('Bitte nur Ziffern verwenden.');
+                if (matrikelError) matrikelError.textContent = 'Matrikelnummern dürfen ausschließlich aus Zahlen bestehen.';
+            } else {
+                matrikel.setCustomValidity('');
+                if (matrikelError) matrikelError.textContent = '';
+            }
+        };
+
         matrikel.addEventListener("beforeinput", event => {
             if (event.data && /\D/.test(event.data)) {
                 event.preventDefault();
@@ -56,11 +80,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         matrikel.addEventListener("input", () => {
             sanitize();
+            validateMatrikel();
             persistFormData();
         });
 
-        // Initial sicherstellen, dass nur Ziffern gesetzt sind
+        matrikel.addEventListener("blur", validateMatrikel);
+
         sanitize();
+        validateMatrikel();
     }
 
     function collectFormData() {
@@ -79,21 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function persistFormData() {
         const payload = collectFormData();
-        const params = new URLSearchParams(window.location.search);
 
-        Object.entries({
-            vorname: payload.vorname,
-            nachname: payload.nachname,
-            matrikel: payload.matrikel,
-            kurs: payload.kurs,
-            studiengang: payload.studiengang,
-            semester: payload.semester,
-            vertiefung: payload.vertiefung,
-            studiengangsleitung: payload.studiengangsleitung,
-            zeitraum: payload.zeitraum
-        }).forEach(([key, value]) => params.set(key, value || ""));
+        if (storage?.saveSection && storage?.buildParams && storage?.syncUrl) {
+            storage.saveSection('step1', payload);
+            const params = storage.buildParams({ step1: payload });
+            storage.syncUrl(params);
+            return;
+        }
 
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        const paramsFallback = new URLSearchParams(window.location.search);
+        Object.entries(payload).forEach(([key, value]) => paramsFallback.set(key, value || ""));
+        const newUrl = `${window.location.pathname}?${paramsFallback.toString()}`;
         window.history.replaceState({}, "", newUrl);
     }
 
@@ -107,13 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (studiengangsleitung && data.studiengangsleitung) studiengangsleitung.value = data.studiengangsleitung;
         if (dateRangeInput && data.zeitraum) dateRangeInput.value = data.zeitraum;
     }
-
-
-    // =====================================================
-    //   WICHTIG: ALLE AUTO-FILL / Speicherung entfernen!
-    //   (In Option B wird NICHTS lokal gespeichert)
-    // =====================================================
-
 
 
     // =====================================================
@@ -207,25 +223,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // =====================================================
-    //   URL PARAMETER ERSTELLEN (Option B)
+    //   URL PARAMETER ERSTELLEN (Routing via GET)
     // =====================================================
 
     function buildUrlParams() {
-        const params = new URLSearchParams();
         const data = collectFormData();
-
-        Object.entries({
-            vorname: data.vorname,
-            nachname: data.nachname,
-            matrikel: data.matrikel,
-            kurs: data.kurs,
-            studiengang: data.studiengang,
-            semester: data.semester,
-            vertiefung: data.vertiefung,
-            studiengangsleitung: data.studiengangsleitung,
-            zeitraum: data.zeitraum
-        }).forEach(([key, value]) => params.set(key, value || ""));
-
+        if (storage?.buildParams) {
+            return storage.buildParams({ step1: data }).toString();
+        }
+        const params = new URLSearchParams();
+        Object.entries(data).forEach(([key, value]) => params.set(key, value || ""));
         return params.toString();
     }
 
