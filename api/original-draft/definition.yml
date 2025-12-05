@@ -1,0 +1,564 @@
+openapi: 3.0.3
+info:
+  title: DHBW Managment API
+  description: API for managing course schedules, semester boundaries, and event timeslots
+  version: 1.0.0
+  contact:
+    name: Dietrich Poensgen
+    email: die.poensgen.24@heilbronn.dhbw.de
+
+servers:
+  - url: http://localhost:5555
+    description: Local development server
+  - url: https://api.example.com/v1
+    description: Production server
+
+tags:
+  - name: Semester
+    description: Semester metadata
+  - name: Lectures
+    description: Lecture planning/managment
+  - name: Calendar
+    description: Calendar data retrieval
+
+paths:
+  /semester/boundaries:
+    get:
+      tags:
+        - Semester
+      summary: Get semester boundaries
+      description: Returns the start and end dates for the current semester
+      operationId: getSemesterBoundaries
+      responses:
+        "200":
+          description: Successful response with semester boundaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SemesterBoundaries"
+              examples:
+                winterSemester:
+                  summary: Winter Semester 2024/2025
+                  value:
+                    title: "Winter Semester 2024/2025"
+                    cycle: "A"
+                    startDate: "2024-10-01"
+                    endDate: "2024-12-22"
+                summerSemester:
+                  summary: Summer Semester 2025
+                  value:
+                    title: "Sommersemester 2025"
+                    cycle: "A"
+                    startDate: "2025-03-31"
+                    endDate: "2025-06-22"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /semester/classes:
+    get:
+      tags:
+        - Semester
+      summary: Get all classes for the current semester
+      description: Returns a list of all course identifiers (class names) available in the current semester
+      operationId: getSemesterClasses
+      responses:
+        "200":
+          description: Successful response with list of course identifiers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseList"
+              examples:
+                winterSemester:
+                  summary: Courses in Winter Semester 2024/2025
+                  value:
+                    - "WI24A2"
+                    - "WI24A3"
+                    - "WI25A3"
+                summerSemester:
+                  summary: Courses in Summer Semester 2025
+                  value:
+                    - "WI24A2"
+                    - "WI24A3"
+                    - "WI25A3"
+                    - "DSKI24A1"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /semester/modules:
+    get:
+      tags:
+        - Semester
+      summary: Get modules for a specific course
+      description: Returns a list of all modules for the specified course, including details such as name, ECTS credits, teacher, and planned time contingent
+      operationId: getCourseModules
+      parameters:
+        - name: course
+          in: query
+          required: true
+          description: Course identifier (e.g., WI24A2, WI24A3)
+          schema:
+            type: string
+            pattern: '^[A-Z]{2,4}\d{2}[A-Z]\d{1,2}$'
+            example: "WI24A3"
+      responses:
+        "200":
+          description: Successful response with list of modules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModuleList"
+              examples:
+                webDevelopmentCourse:
+                  summary: Modules for WI24A3
+                  value:
+                    - id: "T3INF1001"
+                      name: "Theoretische Informatik I"
+                      ects: 5
+                      teacher: "Prof. Dr. Müller"
+                      plannedTimeContingent: 60
+                    - id: "T3INF2001"
+                      name: "Webengineering"
+                      ects: 6
+                      teacher: "Prof. Dr. Schmidt"
+                      plannedTimeContingent: 72
+                    - id: "T3WI1001"
+                      name: "Grundlagen der BWL"
+                      ects: 5
+                      teacher: "Prof. Dr. Weber"
+                      plannedTimeContingent: 60
+        "400":
+          description: Bad request - invalid course identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /calendar:
+    get:
+      tags:
+        - Calendar
+      summary: Get course schedule calendar
+      description: Returns the iCalendar (.ics) file content of the lessons for the specified course. If no course parameter is provided, a 404 HTTP error code is returned.
+      operationId: getCourseCalendar
+      parameters:
+        - name: course
+          in: query
+          required: false
+          description: Course identifier (case-insensitive). Defaults to 'wi24a3' if not provided.
+          schema:
+            type: string
+            pattern: '^[A-Z]{2,4}\d{2}[A-Z]\d{1,2}$'
+            example: "wi24a3"
+          examples:
+            wi24a3:
+              summary: WI24A3 course
+              value: "wi24a3"
+            wi24a2:
+              summary: WI24A2 course
+              value: "wi24a2"
+            wi25a3:
+              summary: WI25A3 course
+              value: "wi25a3"
+      responses:
+        "200":
+          description: Successful response with iCalendar file
+          content:
+            text/calendar:
+              schema:
+                type: string
+                format: binary
+                description: iCalendar (.ics) file content in iCal format
+              example: |
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                PRODID:-//DHBW//Course Calendar//EN
+                BEGIN:VEVENT
+                DTSTART:20250115T090000
+                DTEND:20250115T121500
+                SUMMARY:Webengineering
+                LOCATION:Hörsaal 101
+                END:VEVENT
+                END:VCALENDAR
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: "text/calendar"
+            Content-Disposition:
+              schema:
+                type: string
+                example: "attachment; filename=wi24a3.ics"
+        "404":
+          description: Course not found or calendar file does not exist
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                courseNotFound:
+                  summary: Course not found
+                  value: "Course 'wi99z9' not found."
+                fileNotFound:
+                  summary: Calendar file not found
+                  value: "Calendar file for course 'wi24a3' not found"
+        "500":
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "Error: Unable to read calendar file"
+
+  /lectures/timeslots:
+    post:
+      tags:
+        - Lectures
+      summary: Submit timeslots for a lecture
+      description: Accepts a set of timeslots (events with start and end dates) for a specific lecture identified by its lecture ID
+      operationId: submitLectureTimeslots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimeslotSubmission"
+            examples:
+              webDevelopmentLecture:
+                summary: Submit timeslots for Web Development lecture
+                value:
+                  courseID: "WI24A3"
+                  lectureID: "T3INF2001"
+                  lecturerToken: "lPt2jikEHPzM4icrIT9F9BRCi0zGw5SqhL3RIZLbfEsaGRXS44eG94kMPW0M4zDw"
+                  events:
+                    - startDate: "2025-01-15T09:00:00"
+                      endDate: "2025-01-15T12:15:00"
+                    - startDate: "2025-01-17T13:15:00"
+                      endDate: "2025-01-17T16:30:00"
+                    - startDate: "2025-01-22T09:00:00"
+                      endDate: "2025-01-22T12:15:00"
+              theoreticalInformatics:
+                summary: Submit timeslots for Theoretical Informatics
+                value:
+                  courseID: "WI24A2"
+                  lectureID: "T3INF1001"
+                  events:
+                    - startDate: "2025-01-16T08:30:00"
+                      endDate: "2025-01-16T10:00:00"
+                    - startDate: "2025-01-18T08:30:00"
+                      endDate: "2025-01-18T10:00:00"
+      responses:
+        "201":
+          description: Timeslots successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeslotSubmissionResponse"
+              examples:
+                successfulSubmission:
+                  summary: Successful timeslot submission
+                  value:
+                    courseID: "WI24A3"
+                    lectureID: "T3INF2001"
+                    eventsCreated: 3
+                    message: "Timeslots successfully submitted for lecture T3INF2001"
+        "400":
+          description: Bad request - invalid data format or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                invalidDateFormat:
+                  summary: Invalid date format
+                  value:
+                    code: "INVALID_DATE_FORMAT"
+                    message: "Start date or end date has an invalid format"
+                    details: "Expected ISO 8601 format: YYYY-MM-DDTHH:mm:ss"
+                endBeforeStart:
+                  summary: End date before start date
+                  value:
+                    code: "INVALID_DATE_RANGE"
+                    message: "End date must be after start date"
+                    details: "Event with startDate 2025-01-15T12:00:00 has endDate 2025-01-15T09:00:00"
+        "404":
+          description: Lecture not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                lectureNotFound:
+                  summary: Lecture ID not found
+                  value:
+                    code: "LECTURE_NOT_FOUND"
+                    message: "The specified lecture could not be found"
+                    details: 'Lecture ID "T3XYZ9999" does not exist'
+        "409":
+          description: Conflict - timeslot overlaps with existing event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                timeslotConflict:
+                  summary: Timeslot conflict
+                  value:
+                    code: "TIMESLOT_CONFLICT"
+                    message: "One or more timeslots conflict with existing events"
+                    details: "Another timeslot is already booked on 2025-01-15 from 09:00 to 12:15"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    SemesterBoundaries:
+      type: object
+      required:
+        - startDate
+        - endDate
+      properties:
+        title:
+          type: string
+          example: "Wintersemester 2024/2025"
+        cycle:
+          type: string
+          enum:
+            - "A"
+            - "B"
+          description: Cycle designation; allowed values are 'A' or 'B'
+          example: "A"
+        startDate:
+          type: string
+          format: date
+          description: The start date of the semester in ISO 8601 format (YYYY-MM-DD)
+          example: "2024-10-01"
+        endDate:
+          type: string
+          format: date
+          description: The end date of the semester in ISO 8601 format (YYYY-MM-DD)
+          example: "2025-02-28"
+      description: Represents the start and end dates of a semester
+
+    CourseList:
+      type: array
+      items:
+        type: string
+        pattern: '^[A-Z]{2,4}\d{2}[A-Z]\d{1,2}$'
+        description: Course identifier following the pattern (e.g., WI24A2, DSKI24A1)
+      description: List of course identifiers for the current semester
+      example:
+        - "WI24A2"
+        - "WI24A3"
+        - "WI25A3"
+
+    Module:
+      type: object
+      required:
+        - id
+        - name
+        - ects
+        - teacher
+        - plannedTimeContingent
+      properties:
+        id:
+          type: string
+          description: Unique module identifier (e.g., T3INF1001)
+          pattern: '^T\d[A-Z]{2,3}\d{4}$'
+          example: "T3INF1001"
+        name:
+          type: string
+          description: Full name of the module
+          minLength: 1
+          maxLength: 200
+          example: "Theoretische Informatik I"
+        ects:
+          type: integer
+          description: ECTS credit points for the module
+          minimum: 1
+          maximum: 30
+          example: 5
+        teacher:
+          type: string
+          description: Name of the teacher/professor responsible for the module
+          minLength: 1
+          maxLength: 100
+          example: "Prof. Dr. Müller"
+        plannedTimeContingent:
+          type: integer
+          description: Planned time contingent in hours for the module
+          minimum: 0
+          example: 60
+      description: Represents a single module with its associated details
+
+    ModuleList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Module"
+      description: List of modules for a specific course
+
+    LectureEvent:
+      type: object
+      required:
+        - startDate
+        - endDate
+      properties:
+        startDate:
+          type: string
+          format: date-time
+          description: Start date and time of the event in ISO 8601 format (YYYY-MM-DDTHH:mm:ss)
+          example: "2025-01-15T09:00:00"
+        endDate:
+          type: string
+          format: date-time
+          description: End date and time of the event in ISO 8601 format (YYYY-MM-DDTHH:mm:ss)
+          example: "2025-01-15T12:15:00"
+      description: Represents a single lecture event with start and end date
+
+    TimeslotSubmission:
+      type: object
+      required:
+        - courseID
+        - lectureID
+        - events
+      properties:
+        courseID:
+          type: string
+          description: Course identifier to which this lecture belongs
+          pattern: '^[A-Z]{2,4}\d{2}[A-Z]\d{1,2}$'
+          example: "WI24A3"
+        lectureID:
+          type: string
+          description: Unique identifier of the lecture/module
+          pattern: '^T\d[A-Z]{2,3}\d{4}$'
+          example: "T3INF2001"
+        events:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/LectureEvent"
+          description: List of events to be scheduled for the lecture
+      description: Request payload for submitting timeslots for a lecture
+
+    TimeslotSubmissionResponse:
+      type: object
+      required:
+        - courseID
+        - lectureID
+        - lecturerToken
+        - eventsCreated
+        - message
+      properties:
+        courseID:
+          type: string
+          description: The course ID for which timeslots were created
+          example: "WI24A3"
+        lectureID:
+          type: string
+          description: The lecture ID for which timeslots were created
+          example: "T3INF2001"
+        lecturerToken:
+          type: string
+          description: Individual token (length 64 characters) for the submitting lecturer to ensure the integrity of the request
+          minLength: 64
+          maxLength: 64
+          example: "lPt2jikEHPzM4icrIT9F9BRCi0zGw5SqhL3RIZLbfEsaGRXS44eG94kMPW0M4zDw"
+        eventsCreated:
+          type: integer
+          description: Number of events successfully created
+          minimum: 0
+          example: 3
+        message:
+          type: string
+          description: Success message
+          example: "Timeslots successfully submitted for lecture T3INF2001"
+      description: Response after successfully submitting timeslots
+
+    Timeslot:
+      type: object
+      required:
+        - date
+        - startTime
+        - endTime
+      properties:
+        date:
+          type: string
+          format: date
+          description: The date of the timeslot in ISO 8601 format (YYYY-MM-DD)
+          example: "2025-01-15"
+        startTime:
+          type: string
+          pattern: "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+          description: Start time in HH:MM format (24-hour)
+          example: "09:00"
+        endTime:
+          type: string
+          pattern: "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+          description: End time in HH:MM format (24-hour)
+          example: "12:15"
+        instructor:
+          type: string
+          description: Name of the instructor or lecturer
+          example: "Prof. Dr. Schmidt"
+      description: Represents a single timeslot for an event
+
+    TimeslotResponse:
+      type: object
+      required:
+        - eventName
+        - timeslots
+      properties:
+        eventName:
+          type: string
+          description: The name of the event
+          example: "Web Development"
+        timeslots:
+          type: array
+          items:
+            $ref: "#/components/schemas/Timeslot"
+          description: List of available timeslots for the event
+      description: Response containing all timeslots for a requested event
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code for categorizing the error
+          example: "EVENT_NOT_FOUND"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The requested event could not be found"
+        details:
+          type: string
+          description: Additional details about the error (optional)
+          example: 'Event name "XYZ" does not exist in the current semester'
+      description: Standard error response structure

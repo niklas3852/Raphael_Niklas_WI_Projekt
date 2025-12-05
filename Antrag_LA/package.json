@@ -1,0 +1,24 @@
+{
+  "name": "dhbw-antrag-learning-agreement",
+  "version": "1.0.0",
+  "description": "Web-UI für Learning Agreement Antrag (DHBW) - statisches Frontendprojekt",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "http-server ./ -p 8080 -c-1",
+    "dev": "http-server ./ -p 8080 -c-1",
+    "test": "node ./tests/test_step4.js || echo 'No test runner configured; see tests/'"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "dhbw",
+    "learning-agreement",
+    "frontend",
+    "static"
+  ],
+  "engines": {
+    "node": ">=14"
+  }
+}

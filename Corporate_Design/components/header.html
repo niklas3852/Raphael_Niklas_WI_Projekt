@@ -1,0 +1,68 @@
+<!-- 
+  Komponente: Header
+  Zweck: Kopfzeile mit Logo, Navigation und Profil-Menü.
+-->
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wirtschaftsinformatik</title>
+</head>
+
+<body>
+  <header class="wi-header">
+    <!-- Logo links -->
+    <div class="wi-header__left">
+      <a href="Persönliches_Dashboard/index.html">
+        <div class="wi-brand">
+          <div class="wi-brand__logo" aria-hidden="true">
+            <img alt="Logo" class="wi-logo-img" />
+          </div>
+          <span class="wi-brand__name">Wirtschaftsinformatik</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="wi-header__right">
+      <!-- Mittig: 4 Buttons -->
+      <!-- 
+        Container für die dynamische Navigation.
+        Hier injiziert 'header.js' die passenden Links basierend auf der Benutzerrolle.
+      -->
+      <div id="header-content"></div>
+
+      <!-- Button für Profil-Menu -->
+      <div class="wi-dd wi-dd--align-right">
+        <button class="wi-iconbtn" aria-expanded="false" aria-controls="dd-profil">
+          <!-- Profil-Icon -->
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path fill="currentColor"
+              d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
+          </svg>
+        </button>
+        <ul class="wi-dd__menu" id="wi-profile" hidden>
+          <li>
+            <a role="menuitem" href="Persönliches_Dashboard/index.html">Profil</a>
+          </li>
+          <li>
+            <a role="menuitem" href="Corporate_Design/settings.html">Einstellungen</a>
+          </li>
+          <li><a role="menuitem" href="#" id="logout-link">Logout</a></li>
+        </ul>
+      </div>
+
+      <!-- Burger-Menü -->
+      <button class="wi-burgerbtn wi-iconbtn" aria-label="Menü öffnen" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+          <path fill="currentColor" d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+  <!-- Logik für den Header (z.B. Menü-Interaktionen) -->
+  <script src="../js/ui/header.js"></script>
+</body>
+
+</html>

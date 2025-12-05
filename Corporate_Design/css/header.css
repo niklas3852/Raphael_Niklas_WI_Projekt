@@ -1,0 +1,354 @@
+/* =========================================
+   Datei: header.css
+   Zweck: Styles für den Header, Navigation und Responsive-Verhalten.
+   ========================================= */
+
+/* ================================
+   Header-spezifische Styles 
+   ================================ */
+
+/* Lokaler Namensraum – Variablen gelten nur im Header */
+.wi-header {
+  /* Design-Token nur für Header */
+  --wi-color-text: #ffffff;
+  --wi-color-border-translucent: rgba(255, 255, 255, .28);
+  --wi-color-border-strong: rgba(255, 255, 255, .38);
+  --wi-gap-sm: .5rem;
+  --wi-gap-md: .75rem;
+  --wi-gap-lg: 1rem;
+  --wi-gap-controls: .5rem;
+
+  --wi-fs-base: 16px;
+  --wi-fw-semibold: 600;
+  --wi-fw-bold: 700;
+
+  --wi-header-pad-y: .75rem;
+  --wi-header-pad-x: 1rem;
+  --wi-control-h: 40px;
+  --wi-logo-size: 42px;
+  --wi-dropdown-minw: 260px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--wi-gap-sm);
+  padding: var(--wi-header-pad-y) var(--wi-header-pad-x);
+  background: var(--color-primary);
+  color: var(--wi-color-text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+  font-family: var(--font-sans);
+  transition: transform .35s ease, opacity .25s ease;
+  will-change: transform, opacity;
+  flex-wrap: nowrap;
+}
+
+.wi-header.is-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===========================================
+   Header: Button-Schriftgröße leicht erhöhen
+   =========================================== */
+
+.wi-header .btn {
+  font-size: 1.05rem;
+  /* leicht größer als Standard (~+5%) */
+  padding: 0.65rem 1.1rem;
+  /* minimal mehr Innenabstand für Balance */
+  box-shadow: none;
+}
+
+/* Brand (links) */
+.wi-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--wi-gap-md);
+}
+
+.wi-header__left a {
+  text-decoration: none;
+}
+
+.wi-brand {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  white-space: nowrap;
+}
+
+.wi-brand__logo {
+  width: var(--wi-logo-size);
+  height: var(--wi-logo-size);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-primary);
+  place-items: center;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.wi-brand__name {
+  font-weight: var(--wi-fw-bold);
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+/* ===========================================
+   Logo für Light/Dark Mode
+   =========================================== */
+
+
+.wi-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.25s ease;
+  content: url("../assets/WI_maskot_light.png");
+}
+
+/* Dark Mode Logo */
+@media (prefers-color-scheme: dark) {
+  .wi-logo-img {
+    content: url("../assets/WI_maskot_dark.png");
+  }
+}
+
+/* Zentrale Navigation */
+.wi-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+  margin-left: auto;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: var(--wi-gap-controls);
+}
+
+.wi-dd {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.wi-dd a {
+  text-decoration: none;
+}
+
+.wi-dd__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: var(--wi-dropdown-minw);
+  background: var(--color-primary-600);
+  border: 1px solid var(--wi-color-border-strong);
+  border-radius: var(--radius-md);
+  padding: .35rem;
+  margin: 0;
+  list-style: none;
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+}
+
+.wi-dd__menu a {
+  display: block;
+  padding: .55rem .7rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+}
+
+.wi-dd__menu a:hover,
+.wi-dd__menu a:focus-visible {
+  background: var(--color-primary-700);
+  text-decoration: none;
+}
+
+.wi-dd__menu li+li a {
+  margin-top: .1rem;
+}
+
+/* Variante für rechtsbündige Dropdowns (z. B. Profilmenü) */
+.wi-dd--align-right .wi-dd__menu {
+  left: auto;
+  right: 0;
+}
+
+
+/* Rechte Icons */
+.wi-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--wi-gap-controls);
+  margin-left: auto;
+  /* schiebt den ganzen Block nach rechts */
+  justify-content: flex-end;
+  /* richtet Inhalt rechtsbündig aus */
+  flex-grow: 1;
+  /* füllt restlichen Platz aus */
+
+}
+
+#header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--wi-gap-controls);
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.wi-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--wi-control-h);
+  height: var(--wi-control-h);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  background: transparent;
+  transition: background .18s ease, transform .02s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.wi-burgerbtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--wi-control-h);
+  height: var(--wi-control-h);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  background: transparent;
+  transition: background .18s ease, transform .02s ease;
+  border: 1px solid #fff;
+  box-shadow: none;
+  outline: none;
+}
+
+
+.wi-iconbtn:hover,
+.wi-iconbtn:focus-visible {
+  background: var(--color-primary-600);
+}
+
+.wi-iconbtn:active {
+  transform: scale(.98);
+}
+
+.wi-iconbtn svg {
+  display: block;
+}
+
+
+/* Responsive Feinschliff */
+@media (max-width: 900px) {
+  .wi-nav {
+    justify-content: flex-start;
+    gap: .4rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .wi-brand__name {
+    display: none;
+  }
+
+  .wi-nav {
+    justify-content: flex-start;
+  }
+}
+
+/* Responsive Navigation mit Burger-Menü */
+
+/* Ab kleinerer Breite: Hauptnavigation verstecken, Burger zeigen */
+@media (max-width: 86em) {
+  .wi-nav {
+    display: none;
+  }
+
+  .wi-burgerbtn {
+    display: inline-flex;
+  }
+
+  /* Optional: Dropdown-Overlay-Stil, wenn geöffnet */
+  .wi-nav.mobile-open {
+    display: flex;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    flex-direction: column;
+    background: var(--color-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 300;
+  }
+
+  .wi-nav.mobile-open .wi-dd {
+    width: 100%;
+    position: relative;
+  }
+
+  .wi-nav.mobile-open .btn {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    font-size: 1.05rem;
+  }
+
+  /* Header-Right: alles eng zusammen nach rechts */
+  .wi-header__right {
+    justify-content: flex-end;
+    gap: 0.5rem;
+    /* kleiner Abstand zwischen Kalender & Profil */
+  }
+
+  /* Header-Content (Kalender + ggf. Buttons/Burger) ebenfalls rechts halten */
+  #header-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  /* Menü statt absolut nun statisch positionieren */
+  .wi-nav.mobile-open .wi-dd__menu {
+    position: static;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-top: 0.25rem;
+    background: var(--color-primary-600);
+  }
+
+  /* Menü-Links im Stil der Buttons */
+  .wi-nav.mobile-open .wi-dd__menu a {
+    padding-left: 1.5rem;
+    border-radius: var(--radius-sm);
+    display: block;
+    font-size: var(--fs-sm);
+  }
+
+  /* Leichtes Trennen zwischen Haupt- und Unterpunkten */
+  .wi-nav.mobile-open .wi-dd__menu li+li a {
+    margin-top: 0.25rem;
+  }
+
+  /* ===========================================
+   Aktiver Zustand für geöffnete Dropdowns
+   =========================================== */
+  .wi-dd .btn.primary.is-active,
+  .wi-dd .btn.primary[aria-expanded="true"] {
+    background: var(--color-primary-700);
+    color: #fff;
+  }
+}

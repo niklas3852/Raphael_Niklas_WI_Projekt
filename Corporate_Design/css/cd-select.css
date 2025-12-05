@@ -1,0 +1,87 @@
+/* =========================================
+   Datei: cd-select.css
+   Zweck: Styling für das benutzerdefinierte Dropdown-Menü <cd-select>.
+   ========================================= */
+
+/* Styles für das Custom-Element <cd-select> und dessen Pfeil */
+cd-select {
+  position: relative;
+  display: block;
+  font-family: inherit;
+  color: var(--cd-select-text);
+  width: 100%;
+}
+
+/* Styling des Buttons, der das Dropdown öffnet */
+cd-select button {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  padding: var(--cd-select-padding-y, .6rem) var(--space-6, 2rem) var(--cd-select-padding-y, .6rem) var(--cd-select-padding-x, .75rem);
+  border: 1px solid var(--cd-select-border);
+  border-radius: var(--cd-select-radius);
+  background: var(--cd-select-bg);
+  box-shadow: var(--cd-select-shadow);
+  cursor: pointer;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* Pfeil-Icon im Button */
+cd-select button::after {
+  content: "";
+  position: absolute;
+  right: .75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2rem;
+  height: 2rem;
+  background: no-repeat center/contain url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='%23111827' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5'/></svg>");
+  opacity: .7;
+  pointer-events: none;
+}
+
+cd-select button:focus-visible {
+  outline: none;
+  box-shadow: var(--cd-select-focus);
+}
+
+/* Die Dropdown-Liste (initial versteckt) */
+cd-select ul {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-top: .25rem;
+  background: var(--cd-select-surface);
+  border: 1px solid var(--cd-select-border);
+  border-radius: var(--cd-select-radius);
+  box-shadow: var(--cd-select-shadow);
+  list-style: none;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: var(--cd-select-z, 10);
+  display: none;
+}
+
+/* Zeige Liste an, wenn aria-hidden="false" */
+cd-select ul[aria-hidden="false"] {
+  display: block;
+}
+
+/* Einzelne Listenoptionen */
+cd-select li {
+  padding: .5rem .75rem;
+  cursor: pointer;
+}
+
+cd-select li:hover,
+cd-select li[aria-selected="true"] {
+  background: var(--color-surface);
+}
+
+cd-select li[disabled] {
+  color: var(--color-muted);
+  cursor: not-allowed;
+}

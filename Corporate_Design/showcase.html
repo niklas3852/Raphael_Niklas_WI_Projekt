@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <!-- Grundlegende Seiteneinstellungen und Metadaten -->
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta
+    content="Hier finden Sie die allgemeinen Corporate Design Entscheidungen des Studentenprojekts des Kurses WI24A3 im Modul Web-Programmierung."
+    name="description" />
+  <title>Corporate Design – Token Showcase</title>
+
+  <link rel="stylesheet" href="./css/corporate-design.css" />
+
+  <!-- Importieren der Corporate Design Hilfsfunktionen -->
+  <script type="module">
+    import { loadCorporateDesignAssets } from "./js/path-helper.js";
+    loadCorporateDesignAssets();
+  </script>
+
+  <!-- Authentifizierungsschutz und UI-Inklusion -->
+  <script type="module" src="./js/auth-guard.js" data-auth-guard></script>
+  <script type="module" src="./js/ui/include.js"></script>
+
+  <style>
+    /* Demo-spezifische Stile (nutzen Tokens für Dark Mode Unterstützung) */
+    /* Diese Stile sind nur für die Showcase-Seite relevant */
+    .token {
+      font-family: var(--font-mono), monospace;
+      background: var(--color-surface);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+
+    .row {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* color grid for swatches (harmonizes with .swatch from corporate CSS) */
+    .swatch {
+      position: relative;
+    }
+
+    .swatch .color {
+      position: relative;
+    }
+
+    .swatch .meta {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-2);
+    }
+
+    .badge {
+      font-family: var(--font-mono), monospace;
+      border: 1px solid var(--color-border);
+      padding: 0 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    table.token-table th,
+    table.token-table td {
+      border-top: 1px solid var(--color-border);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.token-table th {
+      background: var(--color-surface);
+    }
+
+    table.token-table tr:hover td {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Simple component demo cards */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 900px) {
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-text);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: var(--fs-sm);
+    }
+
+    .kbd {
+      font-family: var(--font-mono), monospace;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Dropdown demo */
+    details.dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    details.dropdown>summary {
+      list-style: none;
+      cursor: pointer;
+    }
+
+    details.dropdown[open]>summary {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    details.dropdown menu {
+      position: absolute;
+      top: calc(100% - 2px);
+      left: 0;
+      z-index: 20;
+      min-width: 220px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 6px;
+      margin: 0;
+    }
+
+    details.dropdown menu a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--color-text);
+    }
+
+    details.dropdown menu a:hover {
+      background: rgba(0, 0, 0, 0.06);
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Platzhalter für Header und Chat, die dynamisch geladen werden -->
+  <div data-include="header"></div>
+  <div data-include="chat"></div>
+
+  <a class="visually-hidden" href="#main">Zum Inhalt springen</a>
+
+  <span id="top"></span>
+
+  <div class="container">
+    <hr />
+
+    <main id="main">
+      <!-- Abschnitt: Farben -->
+      <!-- Zeigt die definierte Farbpalette des Corporate Designs -->
+      <section aria-labelledby="colors-heading">
+        <h2 id="colors-heading">Farben</h2>
+        <p>
+          Primär-, Sekundär- und Statusfarben mit hell/dunkel-Textwahl (auto).
+        </p>
+
+        <div class="grid cols-3">
+          <div class="swatch">
+            <div class="color" style="background: var(--color-primary)"></div>
+            <div class="meta">
+              <span>--color-primary</span><span class="badge">#284791</span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--color-primary-600)"></div>
+            <div class="meta">
+              <span>--color-primary-600</span><span class="badge">#1e3a78</span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--color-primary-700)"></div>
+            <div class="meta">
+              <span>--color-primary-700</span><span class="badge">#142a5a</span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--color-secondary)"></div>
+            <div class="meta">
+              <span>--color-secondary</span><span class="badge">#3b82f6</span>
+            </div>
+          </div>
+
+          <div class="swatch" data-color-dark="#607bde" data-color-light="#2b3550">
+            <div class="color" style="background: var(--color-accent)"></div>
+            <div class="meta">
+              <span>--color-accent</span>
+              <span class="badge color-value"></span>
+            </div>
+          </div>
+
+          <div class="swatch" data-color-dark="#4a4a4a" data-color-light="#ffffff">
+            <div class="color" style="background: var(--color-bg)"></div>
+            <div class="meta">
+              <span>--color-bg</span>
+              <span class="badge color-value"></span>
+            </div>
+          </div>
+
+          <div class="swatch" data-color-dark="#2e2e2e" data-color-light="#ededed">
+            <div class="color" style="background: var(--color-surface)"></div>
+            <div class="meta">
+              <span>--color-surface</span>
+              <span class="badge color-value"></span>
+            </div>
+          </div>
+
+          <div class="swatch" data-color-dark="#2e2e2e" data-color-light="#e5e7eb">
+            <div class="color" style="background: var(--color-border)"></div>
+            <div class="meta">
+              <span>--color-border</span>
+              <span class="badge color-value"></span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--color-text)"></div>
+            <div class="meta">
+              <span>--color-text</span><span class="badge">#111827</span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--color-muted)"></div>
+            <div class="meta">
+              <span>--color-muted</span><span class="badge">#6b7280</span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--success-bg)"></div>
+            <div class="meta">
+              <span>--success-bg</span><span class="badge">#ecfdf5</span>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--danger-bg)"></div>
+            <div class="meta">
+              <span>--danger-bg</span><span class="badge">#fef2f2</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      </section>
+
+      <!-- Abschnitt: Typografie -->
+      <!-- Zeigt Schriftarten und -größen -->
+      <section aria-labelledby="typography-heading" style="margin-top: var(--space-8)">
+        <h2 id="typography-heading">Typografie</h2>
+
+        <div class="card">
+          <h3>Schriftfamilien</h3>
+          <p>
+            <span class="token">--font-sans</span>,
+            <span class="token">--font-mono</span>
+          </p>
+        </div>
+
+        <p></p>
+
+        <div class="card">
+          <h3>Größen (Fluid)</h3>
+          <ul>
+            <li style="font-size: var(--fs-xs)">--fs-xs</li>
+            <li style="font-size: var(--fs-sm)">--fs-sm</li>
+            <li style="font-size: var(--fs-md)">--fs-md</li>
+            <li style="font-size: var(--fs-lg)">--fs-lg</li>
+            <li style="font-size: var(--fs-xl)">--fs-xl</li>
+            <li style="font-size: var(--fs-2xl)">--fs-2xl</li>
+            <li style="font-size: var(--fs-3xl)">--fs-3xl</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Kontrast-Check Hinweis -->
+      <section aria-labelledby="contrast-heading" style="margin-top: var(--space-8)">
+        <h2 id="contrast-heading">Kontrast-Check</h2>
+        <p>
+          Die Swatches oben zeigen live den berechneten Kontrast und schlagen
+          helle/dunkle Textfarbe vor.
+        </p>
+      </section>
+
+      </section>
+
+      <!-- Abschnitt: Buttons -->
+      <!-- Zeigt verschiedene Button-Varianten und Zustände -->
+      <section aria-labelledby="buttons-heading" style="margin-top: var(--space-8)">
+        <h2 id="buttons-heading">Buttons</h2>
+        <p>Varianten und Zustände der Button-Komponente.</p>
+        <div class="card">
+          <div class="row" style="gap: var(--space-3)">
+            <button class="btn primary">Primär</button>
+            <button class="btn secondary">Sekundär</button>
+            <button class="btn outline">Outline</button>
+            <button class="btn ghost">Ghost</button>
+            <button class="btn success">Success</button>
+            <button class="btn warning">Warning</button>
+            <button class="btn danger">Danger</button>
+            <button class="btn" disabled>Disabled</button>
+          </div>
+        </div>
+
+        <p></p>
+
+        <div class="card">
+          <h3>Mit Icons (Demo)</h3>
+          <div class="row">
+            <button class="btn primary">
+              <span aria-hidden="true">★</span>
+              Primary
+            </button>
+            <button class="btn outline">
+              <span aria-hidden="true">⤓</span>
+              Download
+            </button>
+            <a class="btn ghost" href="#top">Zum Anfang</a>
+          </div>
+        </div>
+      </section>
+
+      </section>
+
+      <!-- Abschnitt: Formulare -->
+      <!-- Zeigt Eingabefelder, Selects und Validierungszustände -->
+      <section aria-labelledby="forms-heading" style="margin-top: var(--space-8)">
+        <h2 id="forms-heading">Formulare</h2>
+
+        <div class="demo-grid">
+          <div class="card">
+            <label>
+              E-Mail
+              <input class="input" name="email" placeholder="name@firma.tld" type="email" />
+            </label>
+            <p class="help">Beispiel für Fokus/Invalid States.</p>
+          </div>
+
+          <div class="card">
+            <label>
+              Veraltet – bitte cd-select verwenden. (siehe "Rolle" unten)
+              <select class="select" name="auswahl">
+                <option>Bitte wählen…</option>
+                <option>Alpha</option>
+                <option>Beta</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="card">
+            <span class="label">Rolle</span>
+            <cd-select id="role-select" name="role" placeholder="Bitte Rolle wählen" required>
+              <cd-option value="employee">Mitarbeiter/in</cd-option>
+              <cd-option value="lecturer">Dozent/in</cd-option>
+              <cd-option value="partner">Partner Unternehmen</cd-option>
+              <cd-option value="professor">Professor/in</cd-option>
+              <cd-option value="student">Student/in</cd-option>
+            </cd-select>
+            <div class="form-group" id="fg-student" style="display: none; margin-top: 10px">
+              <label>
+                Matrikelnummer
+                <input autocomplete="off" class="input" inputmode="numeric" name="matrikel" type="text" />
+              </label>
+            </div>
+            <div class="form-group" id="fg-employee" style="display: none; margin-top: 10px">
+              <label>
+                Mitarbeiternummer
+                <input autocomplete="off" class="input" name="mitNr" type="text" />
+              </label>
+            </div>
+            <div class="form-group" id="fg-company" style="display: none; margin-top: 10px">
+              <label>
+                Unternehmensname
+                <input autocomplete="organization" class="input" name="company" type="text" />
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <label>
+              Nachricht
+              <textarea class="textarea" name="nachricht" placeholder="Ihre Nachricht …" rows="4"></textarea>
+            </label>
+          </div>
+
+          <div class="card">
+            <label>
+              Name
+              <input aria-invalid="true" class="input is-invalid" name="invalid-name" placeholder="Fehlerzustand (Demo)"
+                type="text" />
+            </label>
+            <p class="help">.is-invalid setzt roten Fokusrahmen.</p>
+          </div>
+        </div>
+      </section>
+
+      </section>
+
+      <!-- Abschnitt: Alerts -->
+      <!-- Zeigt Benachrichtigungsboxen in verschiedenen Farben -->
+      <section aria-labelledby="alerts-heading" style="margin-top: var(--space-8)">
+        <h2 id="alerts-heading">Alerts</h2>
+
+        <div class="grid cols-2">
+          <div class="alert success">
+            <strong class="title">Erfolg!</strong> Vorgang wurde
+            abgeschlossen.
+          </div>
+          <div class="alert info">
+            <strong class="title">Info</strong> Das ist eine neutrale
+            Information.
+          </div>
+          <div class="alert warning">
+            <strong class="title">Warnung</strong> Bitte prüfen Sie Ihre
+            Eingaben.
+          </div>
+          <div class="alert danger">
+            <strong class="title">Fehler</strong> Etwas ist schiefgelaufen.
+          </div>
+        </div>
+      </section>
+
+      <!-- Chips + KBD -->
+      <section aria-labelledby="chips-heading" style="margin-top: var(--space-8)">
+        <h2 id="chips-heading">Chips &amp; KBD</h2>
+        <div class="row">
+          <span class="chip">Status: Aktiv</span>
+          <span class="chip">Owner: Team&nbsp;A</span>
+          <span class="chip">Sprint: Q4</span>
+
+          <span class="kbd">⌘K</span>
+          <span class="kbd">?</span>
+          <span class="kbd">Shift</span>
+        </div>
+      </section>
+
+      <!-- Dropdown -->
+      <section aria-labelledby="dropdown-heading" style="margin-top: var(--space-8)">
+        <h2 id="dropdown-heading">Dropdown</h2>
+        <details class="dropdown">
+          <summary class="btn outline">Menü öffnen</summary>
+          <menu>
+            <a href="#">Aktion 1</a>
+            <a href="#">Aktion 2</a>
+            <a href="#">Aktion 3</a>
+          </menu>
+        </details>
+      </section>
+
+      <!-- Grid/Card -->
+      <section aria-labelledby="cards-heading" style="margin-top: var(--space-8)">
+        <h2 id="cards-heading">Cards</h2>
+        <div class="grid cols-3">
+          <article class="card">
+            <h3>Komponente A</h3>
+            <p>Kurzer Beschreibungstext für A.</p>
+            <div class="row">
+              <a class="btn primary" href="#">Details</a>
+              <a class="btn outline" href="#">Konfigurieren</a>
+            </div>
+          </article>
+          <article class="card">
+            <h3>Komponente B</h3>
+            <p>Kurzer Beschreibungstext für B.</p>
+            <div class="row">
+              <a class="btn primary" href="#">Details</a>
+              <a class="btn outline" href="#">Konfigurieren</a>
+            </div>
+          </article>
+          <article class="card">
+            <h3>Komponente C</h3>
+            <p>Kurzer Beschreibungstext für C.</p>
+            <div class="row">
+              <a class="btn primary" href="#">Details</a>
+              <a class="btn outline" href="#">Konfigurieren</a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <hr />
+  </div>
+
+  <script>
+    // Kleines Hilfsskript für Dropdown: Schließen wenn ein Link geklickt wird
+    (function () {
+      "use strict";
+      const DROPDOWN_SELECTOR = "details.dropdown";
+
+      function onToggle(ev) {
+        const dd = ev.currentTarget;
+        if (!dd.open) {
+          return;
+        }
+        const onClickOutside = (e) => {
+          if (!dd.contains(e.target)) {
+            dd.removeAttribute("open");
+            document.removeEventListener("click", onClickOutside, true);
+          }
+        };
+        document.addEventListener("click", onClickOutside, true);
+      }
+
+      document.querySelectorAll(DROPDOWN_SELECTOR).forEach((dd) => {
+        const menu = dd.querySelector("menu");
+        if (!menu) {
+          return;
+        }
+        menu.addEventListener("click", (ev) => {
+          const a = ev.target.closest("a");
+          if (!a) {
+            return;
+          }
+          const dd = menu.closest("details.dropdown");
+          if (dd) {
+            dd.removeAttribute("open");
+          }
+        });
+      });
+
+      document.querySelectorAll(DROPDOWN_SELECTOR).forEach((dd) => {
+        dd.addEventListener("toggle", onToggle);
+      });
+    })();
+  </script>
+
+  <script>
+    // Skript für interaktive Formular-Logik (Felder ein-/ausblenden je nach Rolle)
+    document.addEventListener("DOMContentLoaded", function () {
+      const roleSelect = document.getElementById("role-select");
+      const fgStudent = document.getElementById("fg-student");
+      const fgEmployee = document.getElementById("fg-employee");
+      const fgCompany = document.getElementById("fg-company");
+
+      function toggleFields() {
+        const value = roleSelect.value;
+        fgStudent.style.display = "none";
+        fgEmployee.style.display = "none";
+        fgCompany.style.display = "none";
+        if (value === "student") {
+          fgStudent.style.display = "block";
+        } else if (value === "partner") {
+          fgCompany.style.display = "block";
+        } else if (
+          value === "professor" ||
+          value === "employee" ||
+          value === "lecturer"
+        ) {
+          fgEmployee.style.display = "block";
+        }
+      }
+
+      roleSelect.addEventListener("change", toggleFields);
+      // Initial anzeigen, falls Wert gesetzt wurde
+      toggleFields();
+    });
+
+    const updateColorBadges = () => {
+      const darkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.querySelectorAll(".swatch").forEach((swatch) => {
+        const valueEl = swatch.querySelector(".color-value");
+        const color = darkMode
+          ? swatch.dataset.colorDark
+          : swatch.dataset.colorLight;
+        if (valueEl && color) valueEl.textContent = color;
+      });
+    };
+
+    // Initial ausführen
+    updateColorBadges();
+
+    // Bei Theme-Wechsel aktualisieren
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", updateColorBadges);
+  </script>
+
+  <!-- Platzhalter für den Footer, der dynamisch geladen wird -->
+  <div data-include="footer"></div>
+</body>
+
+</html>

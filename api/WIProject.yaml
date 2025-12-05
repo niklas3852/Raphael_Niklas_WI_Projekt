@@ -1,0 +1,462 @@
+openapi: 3.0.4
+info:
+  title: WI API
+  description: API für Verwaltung von Personen, Dozenten, Studierenden, Forschungen, Modulen und Kursen
+  version: 1.0.0
+servers:
+  - url: http://10.150.16.51/wi/api/v1
+  - url: https://wi-web.heilbronn.dhbw.de/api/index.php
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: key
+tags:
+  - name: User
+    description: User metadata
+  - name: Semester
+    description: Semester metadata
+  - name: Lectures
+    description: Lecture planning/managment
+security:
+  - ApiKeyAuth: []
+paths:
+  /user:
+    get:
+      summary: Informationen des angemeldeten benutzers
+      tags:
+        - User
+      operationId: getUser
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Benutzerinformationen
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 12
+                  Title:
+                    type: string
+                    example: Dr.
+                  Firstname:
+                    type: string
+                    example: Carla
+                  Lastname:
+                    type: string
+                    example: Bauer
+                  Gender:
+                    type: string
+                    example: F
+                  Salutation_short:
+                    type: string
+                    example: Frau
+                  Salutation_full:
+                    type: string
+                    example: Sehr geehrte Frau Bauer
+                  RoleNow:
+                    type: string
+                    example: MA
+                  PersonnelId:
+                    type: integer
+                    example: 12345
+                  MatriNr:
+                    type: integer
+                    example: 46302
+                  CourseId:
+                    type: integer
+                    example: 12
+                  FieldId:
+                    type: integer
+                    example: 7
+        "401":
+          description: Ungültiger Schlüssel
+        "405":
+          description: Methode nicht erlaubt
+
+  /lecturers:
+    get:
+      summary: Liste aller dozenten
+      tags:
+        - User
+      operationId: getLecturers
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Array von Dozenten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 35
+                    Title:
+                      type: string
+                      example: Dipl.Ing.
+                    Firstname:
+                      type: string
+                      example: Michael
+                    Lastname:
+                      type: string
+                      example: Brandt
+                    Gender:
+                      type: string
+                      example: M
+                    Salutation_short:
+                      type: string
+                      example: Herr
+                    Salutation_full:
+                      type: string
+                      example: Sehr geehrter Herr Brandt
+                    RoleNow:
+                      type: string
+                      example: DOZ
+                    PersonnelId:
+                      type: integer
+                      example: 5
+
+  /supervisors/{academicYear}/{unitId}:
+    get:
+      summary: Betreuer für jahr und einheit
+      tags:
+        - User
+      operationId: getSupervisors
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: academicYear
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: unitId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste von Betreuern
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    PersonnelId:
+                      type: integer
+                      example: 39
+                    Name:
+                      type: string
+                      example: Timo, Frank
+                    Title:
+                      type: string
+                      example: Dr.
+                    Firstname:
+                      type: string
+                      example: Timo
+                    Lastname:
+                      type: string
+                      example: Frank
+                    Max:
+                      type: integer
+                      example: 5
+                    RandomSel:
+                      type: integer
+                      example: 1
+                    Comment:
+                      type: string
+                      example: ja bitte
+                    UnitId:
+                      type: integer
+                      example: 5
+                    CMatch:
+                      type: integer
+                      example: 1
+        "405":
+          description: Fehlende Parameter
+
+  /researches/{date}:
+    get:
+      summary: Forschungen ab einem datum
+      tags:
+        - Lectures
+      operationId: getResearches
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Liste von Forschungen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ResearchId:
+                      type: integer
+                      example: 8
+                    Title:
+                      type: string
+                      example: Robotik im Pflegebereich
+                    PersonnelId:
+                      type: integer
+                      example: 7
+                    UnitName:
+                      type: string
+                      example: PA2
+                    MatriNr:
+                      type: integer
+                      example: 429673
+                    StudentPersonId:
+                      type: integer
+                      example: 8
+                    StudentFirst:
+                      type: string
+                      example: Paul
+                    StudentLast:
+                      type: string
+                      example: Seidel
+                    CourseNr:
+                      type: string
+                      example: HN-WWI24A2
+                    Problem:
+                      type: string
+                      example: Personalmangel in Pflegeeinrichtungen.
+                    Methodology:
+                      type: string
+                      example: Experteninterviews
+                    Goal:
+                      type: string
+                      example: Konzept für robotische Assistenzsysteme entwickeln.
+        "405":
+          description: Fehlendes Datum
+
+  /research-matchwishes/{researchId}:
+    get:
+      summary: Matchwishes für eine forschung
+      tags:
+        - Lectures
+      operationId: getResearchMathWished
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: researchId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste der Matchwishes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ResearchId:
+                      type: integer
+                      example: 6
+                    MatchWishLast:
+                      type: string
+                      example: Horn
+                    MatchWishFirst:
+                      type: string
+                      example: Claudia
+                    MatchWishId:
+                      type: integer
+                      example: 49
+                    PersonFromId:
+                      type: integer
+                      example: 29
+                    PersonnelWhoId:
+                      type: integer
+                      example: 29
+                    Priority:
+                      type: integer
+                      example: 5
+                    Yes:
+                      type: integer
+                      example: 0
+                    MatchWisherLast:
+                      type: string
+                      example: Kaiser
+                    MatchWisherFirst:
+                      type: string
+                      example: Oliver
+        "405":
+          description: Fehlende ResearchId
+
+  /semester:
+    get:
+      summary: Liste aller semester
+      tags:
+        - Semester
+      operationId: getSemester
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Semesterdaten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Name:
+                      type: string
+                      example: Sommersemester 2022
+                    Name_short:
+                      type: string
+                      example: SoSe 2022
+                    StartDate:
+                      type: string
+                      format: date
+                      example: 2022-03-28
+                    EndDate:
+                      type: string
+                      format: date
+                      example: 2022-06-19
+                    Cycle:
+                      type: string
+                      example: A
+                    Type:
+                      type: string
+                      example: Theorie
+
+  /courses/{date}:
+    get:
+      summary: Liste der kurse zu einem datum
+      tags:
+        - Lectures
+      operationId: getCourses
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Kursdaten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    CourseNr:
+                      type: string
+                      example: HN-WWI22A1
+                    YearName:
+                      type: string
+                      example: Jahrgang 2022
+                    Studyfield:
+                      type: string
+                      example: Business Engineering
+        "405":
+          description: Ungültiges Datumsformat
+
+  /module_units:
+    get:
+      summary: Liste der moduleinheiten
+      tags:
+        - Lectures
+      operationId: getModuleUnits
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Moduleinheiten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ModuleNr:
+                      type: string
+                      example: W3WI_109
+                    UnitNr:
+                      type: string
+                      example: W3WI_109.2
+                    UnitName:
+                      type: string
+                      example: Algorithmen und Datenstrukturen
+                    Units:
+                      type: integer
+                      example: 30
+                    ModuleName:
+                      type: string
+                      example: Programmierung II
+                    Credits:
+                      type: number
+                      example: 5
+
+  /module_lecturer:
+    get:
+      summary: Dozenten zu moduleinheiten
+      tags:
+        - Lectures
+      operationId: getModuleLecturers
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Module Dozenten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Firstname:
+                      type: string
+                      example: Oliver
+                    Lastname:
+                      type: string
+                      example: Kaiser
+                    ModuleNr:
+                      type: string
+                      example: W3WI_108
+                    UnitName:
+                      type: string
+                      example: Einführung in die Programmierung
+                    UnitNr:
+                      type: string
+                      example: W3WI_108.1
+                    Semestername:
+                      type: string
+                      example: WiSe 2021/22
+                    CourseNr:
+                      type: string
+                      example: HN-WWI23A1

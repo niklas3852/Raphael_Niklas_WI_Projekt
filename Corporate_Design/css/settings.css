@@ -1,0 +1,145 @@
+/* =========================================
+   Datei: settings.css
+   Zweck: Styles für die Einstellungsseite (Layout, Formulare, Buttons).
+   ========================================= */
+
+/* Einstellungen – Layout */
+
+/* Gesamt-Layout der Settings-Seite */
+.settings-page {
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* Abstand zwischen den Sections (E-Mail, Ansprechpartner, Passwort) */
+.settings-group {
+  margin-top: var(--space-8);
+}
+
+/* Link "Passwort ändern" */
+.settings-group .settings-link {
+  display: inline-block;
+  margin-top: var(--space-8);
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* Hover-State für "Passwort ändern" */
+.settings-group .settings-link:hover {
+  text-decoration: underline;
+}
+
+/* Überschriften */
+.settings-heading {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--space-3);
+}
+
+/* Zeile mit Inhalt links und Button rechts */
+.settings-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+/* Eingabefelder */
+.settings-input {
+  padding: 0.35rem 0.75rem;
+  font-size: var(--fs-md);
+  width: 100%;
+  max-width: 480px;
+}
+
+/* hidden-Attribute wirklich ausblenden */
+[hidden] {
+  display: none !important;
+}
+
+/* Abstand zwischen mehreren Feldern in derselben Gruppe */
+.settings-field+.settings-field {
+  margin-top: var(--space-4);
+}
+
+/* Readonly-E-Mail-Container oben (user@example.com) */
+.email-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 0.35rem 0.75rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  opacity: 0.6;
+  background-color: var(--color-surface);
+}
+
+/* Copy-Button neben der persönlichen E-Mail */
+.copy-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Icon-Farbe des Copy-Buttons */
+.copy-btn svg {
+  stroke: var(--color-primary);
+}
+
+/* Hover-Hintergrund für Copy-Button */
+.copy-btn:hover {
+  background: var(--color-surface);
+}
+
+/* Zustand: Icon wird durch Haken ersetzt ("kopiert") */
+.copy-btn--copied {
+  font-size: 1.4rem;
+  font-weight: 300;
+}
+
+/* ✓-Buttons zum Speichern */
+.save-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Hover-State der Save-Buttons */
+.save-btn:hover {
+  background: var(--color-primary-700);
+}
+
+/* Dark-Mode: andere Farben für Icon + Link */
+@media (prefers-color-scheme: dark) {
+  .copy-btn svg {
+    stroke: var(--color-secondary);
+  }
+
+  .settings-group .settings-link {
+    color: var(--color-secondary);
+  }
+}
+
+/* Mobile: extra Abstand nach unten für "Passwort ändern" */
+@media (max-width: 600px) {
+  .settings-group .settings-link {
+    padding-bottom: var(--space-8);
+  }
+}

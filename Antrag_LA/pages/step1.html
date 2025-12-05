@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Step 1 - Angabe persönlicher Daten</title>
+    <script type="module">
+        import { loadCorporateDesignAssets } from "../../Corporate_Design/js/path-helper.js";
+        loadCorporateDesignAssets();
+    </script>
+    <!-- SEO Meta Description -->
+    <meta name="description" content="Step 1: Antrag Learning Agreement - Angabe persönlicher Daten">
+    <meta name="author" content="DHBW Heilbronn - WI24A3">
+    <meta name="keywords" content="Learning Agreement, Anerkennung Learning Agreement, Auslandsstudium, DHBW">
+    <meta property="og:title" content="Step 1 - Angabe persönlicher Daten">
+    <meta property="og:description" content="Step 1: Antrag Learning Agreement - Angabe persönlicher Daten">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="../../Corporate_Design/css/corporate-design.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/first-step.css">
+    <link rel="stylesheet" href="../timeline-style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="icon" href="../assets/pictures/favicon.ico" type="icon/x-icon">
+    <script type="module" src="../../Corporate_Design/js/auth-guard.js" data-auth-guard data-roles="student,lecturer"></script> <!-- hier alle erlaubten Rollen eintragen, für `alle Rollen erlaubt` einfach leer lassen bzw. weglassen-->
+    <script type="module" src="../../Corporate_Design/js/ui/include.js"></script>
+</head>
+<body data-step="1">
+<div data-include="header"></div>
+<div data-include="chat"></div>
+
+<div class="upper-main-box-container">
+    <h1 class="upper-main-box">
+        Antrag Learning Agreement für die Anerkennung<br>
+        von im Ausland erbrachten Studienleistungen
+    </h1>
+</div>
+
+<main>
+    <div class="lower-main-box-container">
+        <div class="lower-main-box">
+            <div class="timeline-wrapper">
+                <div class="timeline-bar-horizontal">
+                    <div class="timeline-item"><span class="timeline-dot">1</span><div class="timeline-label">Persönliche Daten</div></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item"><span class="timeline-dot">2</span><div class="timeline-label">Gasthochschule</div></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item"><span class="timeline-dot">3</span><div class="timeline-label">Module</div></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item"><span class="timeline-dot">4</span><div class="timeline-label">Überprüfung</div></div>
+                </div>
+            </div>
+
+            <form class="formular-box-container" id="step1-form" novalidate>
+
+                <!-- Vorname Dropdown -->
+                <div class="field">
+                    <input type="text" name="Vorname" aria-label="Vorname" class="corner-input field__input" placeholder="Vorname*" required title="Vorname eingeben">
+                    <button type="button" class="field__icon" data-tooltip="Dein Vorname wurde bereits systemseitig vorausgefüllt (kann aber bearbeitet werden)." aria-label="Information: Name">i</button>
+                </div>
+                <!-- Nachname Dropdown -->
+                <div class="field">
+                    <input type="text" name="Nachname" aria-label="Nachname" class="corner-input field__input" placeholder="Nachname*   " required title="Nachname eingeben">
+                    <button type="button" class="field__icon" data-tooltip="Dein Nachname wurde bereits systemseitig vorausgefüllt (kann aber bearbeitet werden)." aria-label="Information: Nachname">i</button>
+                </div>
+
+                <!-- Kurs Dropdown -->
+                <div class="field">
+                    <input type="text" name="Kurs" aria-label="Kurs" class="corner-input field__input" placeholder="Kurs*" required>
+                    <button type="button" class="field__icon" data-tooltip="Kursbezeichnung oder Semesterangabe" aria-label="Information: Kurs" disabled>i</button>
+                </div>
+
+                <!-- Matrikel-NR Dropdown -->
+                <div class="field">
+                    <input type="text" name="Matrikel" aria-label="Matrikelnummer" class="corner-input field__input" placeholder="Matrikel-Nr.*" required title="Matrikelnummer eingeben">
+                    <button type="button" class="field__icon" data-tooltip="Deine Matrikelnummer wurde bereits systemseitig vorausgefüllt (kann aber bearbeitet werden)." aria-label="Information: Matrikelnummer">i</button>
+                </div>
+
+                <!-- Studiengang Dropdown -->
+                <div class="field">
+                    <select name="Studiengang" id="studiengang-select" aria-label="Studiengang" class="corner-input field__input" required>
+                        <option value="" disabled selected>Studiengang*</option>
+                        <option value="b1f3c9a0d4e24f6a8c2a9d7f5b6e8f10">Wirtschaftsinformatik</option>
+                        <option value="c3d4e5f60718293a4b5c6d7e8f901234">Food-Management</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <input type="text" name="Studiengangsleitung" aria-label="Studiengangsleitung" class="corner-input field__input" placeholder="Studiengangsleitung*" required>
+                    <button type="button" class="field__icon" data-tooltip="Name der Studiengangsleitung (z. B. Prof. Dr. Mustermann)." aria-label="Information: Studiengangsleitung" disabled>i</button>
+                </div>
+
+                <!-- Vertiefung Dropdown -->
+                <div class="field" id="vertiefung-field">
+                    <select name="Vertiefung" id="vertiefung-select" aria-label="Vertiefung" class="corner-input field__input" required disabled>
+                        <option value="" disabled selected>Vertiefung*</option>
+                    </select>
+                </div>
+
+                <!-- Semester Dropdown -->
+                <div class="field">
+                    <select name="Semester" aria-label="Semester" class="corner-input field__input" required>
+                        <option value="" disabled selected>Semester*</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+
+                <!-- Zeitraum Dropdown -->
+                <div class="field field--full">
+                    <input
+                            type="text"
+                            id="date-range-picker"
+                            name="Zeitspanne"
+                            class="corner-input field__input"
+                            placeholder="Zeitraum (von - bis)*"
+                            required
+                            readonly>
+                </div>
+
+                <p class="pflicht-hinweis">(*) Pflichtfelder</p>
+
+            </form>
+
+            <div class="step-navigation-buttons">
+                <a href="./step2.html" class="btn" id="next">Weiter</a>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<div data-include="footer"></div>
+
+<script src="../db/university_data/dhbw_courses.js" defer></script>
+
+<script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js" defer></script>
+<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.3/gsap.min.js" defer></script>
+<script src="../src/timeline.js" defer></script>
+<script src="../src/step1.js" defer></script>
+<script type="module" src="../../Corporate_Design/js/ui/include.js"></script>
+</body>
+</html>

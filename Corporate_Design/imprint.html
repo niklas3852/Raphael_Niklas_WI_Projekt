@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <!-- Grundlegende Seiteneinstellungen und Metadaten -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impressum – DHBW Heilbronn · Wirtschaftsinformatik</title>
+  <meta name="description" content="Impressum der DHBW Heilbronn" />
+  <meta name="robots" content="index,follow" />
+  <link rel="stylesheet" href="./css/corporate-design.css" />
+  <link rel="stylesheet" href="css/imprint.css" />
+
+  <!-- Importieren der Corporate Design Hilfsfunktionen -->
+  <script type="module">
+    import { loadCorporateDesignAssets } from "./js/path-helper.js";
+    loadCorporateDesignAssets();
+  </script>
+
+  <!-- Authentifizierungsschutz und UI-Inklusion -->
+  <script type="module" src="./js/auth-guard.js" data-auth-guard></script>
+  <script type="module" src="./js/ui/include.js"></script>
+</head>
+
+<body>
+  <!-- Platzhalter für den Header, der dynamisch geladen wird -->
+  <div data-include="header"></div>
+  <div id="page-top" class="visually-hidden">Seitenanfang</div>
+  <!-- Nur Testweise -->
+
+  <!-- Hauptcontainer für den Inhalt des Impressums -->
+  <main class="container" id="content">
+    <h1>Impressum</h1>
+    <p class="small">DHBW Heilbronn - Wirtschaftsinformatik</p>
+
+    <!-- Anbieter -->
+    <section class="card" aria-labelledby="anbieter">
+      <h2 id="anbieter">Angaben gemäß § 5 TMG</h2>
+      <address>
+        Duale Hochschule Baden-Württemberg – Heilbronn<br />
+        Wirtschaftsinformatik<br />
+        Bildungscampus 4<br />
+        74076 Heilbronn<br />
+      </address>
+      <div class="grid cols-2">
+        <div>
+          <h3>Kontakt</h3>
+          <p>
+            Telefon: <a href="tel:+497113206600">0711 / 320660-0</a><br />
+            E-Mail: <a href="mailto:poststelle@dhbw.de">poststelle@dhbw.de</a><br />
+            Website: <a href="https://www.dhbw.de/">https://www.dhbw.de/</a>
+          </p>
+        </div>
+      </div>
+    </section>
+    <!-- Herausgeber & Aufsicht -->
+    <section class="card" aria-labelledby="herausgeber">
+      <h2 id="herausgeber">Herausgeber & Aufsicht</h2>
+      <p>
+        Duale Hochschule Baden-Württemberg gesetzlich vertreten durch die
+        Präsidentin der Dualen Hochschule Baden-Württemberg.<br />
+        <br />
+
+        Prof. Dr. Martina Klärle<br />
+        Friedrichstraße 14 <br />
+        70174 Stuttgart<br /><br />
+
+        Telefon: <a href="tel:+497113206600">0711 / 320660-0</a><br />
+        E-Mail: <a href="mailto:poststelle@dhbw.de">poststelle@dhbw.de</a><br />
+        <a href="https://www.dhbw.de/">https://www.dhbw.de/</a><br /><br />
+
+        Die Duale Hochschule Baden-Württemberg ist eine rechtsfähige
+        Körperschaft des öffentlichen Rechts.<br />
+        Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:
+        DE287664832, <br />
+        Wirtschafts-Identifikationsnummer (W-IdNr.): DE287664832-00001<br /><br />
+
+        Rektorin der DHBW Heilbronn<br />
+        Professor Dr. Nicole Graf<br />
+        Bildungscampus 4<br />
+        74076 Heilbronn <br /><br />
+
+        Telefon: <a href="tel:+497131123723704">07131 / 1237 23704</a><br />
+        E-Mail: <a href="mailto:poststelle@dhbw.de">poststelle@dhbw.de</a><br /><br />
+        <a href="www.heilbronn.dhbw.de">www.heilbronn.dhbw.de</a><br />
+        <a href="https://www.dhbw.de/">https://www.dhbw.de/</a><br />
+      </p>
+    </section>
+
+    <!-- Verantwortliche Person -->
+    <section class="card" aria-labelledby="verantwortlich">
+      <h2 id="verantwortlich">Verantwortliche</h2>
+      <p>
+        <strong>Aliona von der Trenck</strong><br />
+        Studiengangsleitung Wirtschaftsinformatik & Data Science und
+        Künstliche Intelligenz<br />
+        Bildungscampus 4, <br />
+        74076 Heilbronn<br />
+        E-Mail:
+        <a href="mailto:aliona.vondertrenck@dhbw.de">aliona.vondertrenck@dhbw.de</a>
+        <br /><br />
+
+        <strong>Tessa Maria Steinigke</strong><br />
+        Wissenschaftliche Mitarbeiterin Wirtschaftsinformatik & Data Science
+        und Künstliche Intelligenz <br />
+        Bildungscampus 4, <br />
+        74076 Heilbronn<br />
+        E-Mail:
+        <a href="mailto:tessa.steinigke@dhbw.de">tessa.steinigke@dhbw.de</a><br /><br />
+
+        <strong>Kurs WI24A3</strong><br />
+        Erreichbar über Aliona von der Trenck oder Tessa Maria Steinigke.
+      </p>
+    </section>
+
+    <!-- Haftung & Urheberrecht -->
+    <section class="card" aria-labelledby="rechtliches">
+      <h2 id="rechtliches">Rechtliches</h2>
+      <h3 id="haftung">Haftungsausschluss</h3>
+      <p>
+        Die Inhalte dieser Seiten wurden mit größter Sorgfalt erstellt. Für
+        die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir
+        jedoch keine Gewähr übernehmen. Die Duale Hochschule Baden-Württemberg
+        Heilbronn behält sich das Recht vor, ohne vorherige Ankündigung,
+        Änderungen oder Ergänzungen der bereitgestellten Informationen
+        vorzunehmen. Unser Angebot enthält Links zu externen Webseiten
+        Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können
+        wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die
+        Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder
+        Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum
+        Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft.
+        Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht
+        erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten
+        ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht
+        zumutbar. Bei bekannt werden von Rechtsverletzungen werden wir
+        derartige Links umgehend entfernen. Die Duale Hochschule
+        Baden-Württemberg Heilbronn begründet durch die Bereitstellung dieser
+        Informationen kein Vertragsangebot über Auskünfte, Beratung oder
+        ähnliche Vertragsbeziehungen. Jegliche Haftung für die Nutzung der
+        Inhalte der Web Site oder die Richtigkeit der Inhalte oder die
+        Erreichbarkeit der Web Site wird ausgeschlossen. Die Duale Hochschule
+        Baden-Württemberg Heilbronn haftet daher nicht für konkrete,
+        mittelbare und unmittelbare Schäden oder Schäden, die durch fehlende
+        Nutzungsmöglichkeiten, Datenverluste oder entgangene Gewinne entstehen
+        können, die im Zusammenhang mit der Nutzung von Dokumenten oder
+        Informationen entstehen, die auf dieser Website zugänglich sind.
+      </p>
+
+      <h3 id="urheberrecht">Urheberrecht</h3>
+      <p>
+        Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen
+        Seiten unterliegen dem deutschen Urheberrecht. Beiträge Dritter sind
+        als solche gekennzeichnet. Die Vervielfältigung, Bearbeitung,
+        Verbreitung und jede Art der Verwertung außerhalb der Grenzen des
+        Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen
+        Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für
+        den privaten, nicht kommerziellen Gebrauch gestattet.
+      </p>
+    </section>
+
+    <!-- Barrierefreiheit -->
+    <section class="card" aria-labelledby="barrierefreiheit">
+      <h2 id="barrierefreiheit">Barrierefreiheit</h2>
+      <p>
+        Informationen zur digitalen Barrierefreiheit finden Sie in der
+        <button id="barrierefreiheit-link" class="link-button" type="button">
+          Barrierefreiheits­erklärung
+        </button>
+        <!-- bewusstes pop-up mit Hinweis -->
+      </p>
+    </section>
+
+    <!-- Pop-up für Barrierefreiheitshinweis -->
+    <!-- Pop-up für Barrierefreiheitshinweis -->
+    <dialog id="barrierefreiheit-popup" class="popup">
+      <h3 id="popup-title">Hinweis</h3>
+      <p>
+        Die Barrierefreiheitserklärung kann im Nachhinein eingefügt werden.
+      </p>
+      <button class="btn secondary" id="close-popup">Schließen</button>
+    </dialog>
+  </main>
+
+  <div class="container">
+    <p class="small">
+      Letzte Aktualisierung: <time datetime="2025-11-04">04.11.2025</time>
+    </p>
+  </div>
+
+  <!-- Strukturierte Daten für Suchmaschinen (Schema.org) -->
+  <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollegeOrUniversity",
+        "name": "Duale Hochschule Baden-Württemberg – Heilbronn",
+        "department": {
+          "@type": "CollegeOrUniversity",
+          "name": "Bereich Wirtschaftsinformatik"
+        },
+        "url": "https://www.dhbw.de/",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Bildungscampus 4",
+          "postalCode": "74076",
+          "addressLocality": "Heilbronn",
+          "addressCountry": "DE"
+        },
+        "telephone": "+49 713112370",
+        "email": "poststelle@dhbw.de"
+      }
+    </script>
+
+  <!-- Skript für Impressum-spezifische Interaktionen (z.B. Popup) -->
+  <script src="js/imprint.js" defer></script>
+
+  <!-- Platzhalter für den Footer, der dynamisch geladen wird -->
+  <div data-include="footer"></div>
+</body>
+
+</html>

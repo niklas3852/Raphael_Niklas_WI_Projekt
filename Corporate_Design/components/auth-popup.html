@@ -1,0 +1,96 @@
+<!-- 
+  Komponente: Authentifizierungs-Popup
+  Zweck: Stellt das Anmeldeformular bereit, inklusive Rollenauswahl und dynamischen Feldern.
+-->
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Anmeldung</title>
+</head>
+
+<body>
+  <main>
+    <h1 class="visually-hidden">Authentifizierung</h1>
+  </main>
+
+  <!-- 
+      Hauptcontainer für das Anmelde-Popup. 
+      Nutzt das native HTML <dialog> Element für Barrierefreiheit und Standard-Verhalten.
+    -->
+  <dialog aria-labelledby="auth-title" id="auth-dialog">
+    <h2 class="auth-title" id="auth-title">Anmeldung</h2>
+
+    <!-- 
+      Das Formular nutzt method="dialog", was bewirkt, dass beim Absenden 
+      der Dialog geschlossen wird, sofern nicht per JavaScript interveniert wird.
+    -->
+    <form id="auth-form" method="dialog">
+      <!-- 
+          Auswahl der Benutzerrolle (z.B. Student, Mitarbeiter).
+          Dies steuert, welche weiteren Eingabefelder angezeigt werden.
+        -->
+      <div class="form-group">
+        <cd-select id="role-select" name="role" placeholder="Bitte Rolle wählen" required>
+          <cd-option value="employee">Mitarbeiter/in</cd-option>
+          <cd-option value="lecturer">Dozent/in</cd-option>
+          <cd-option value="partner">Partner Unternehmen</cd-option>
+          <cd-option value="study_director">Studiengangsleitung</cd-option>
+          <cd-option value="student">Student/in</cd-option>
+          <cd-option value="secretariat">Sekretariat</cd-option>
+          <cd-option value="management">Studiengangs Management</cd-option>
+          <cd-option value="supervisor">Betreuer</cd-option>
+        </cd-select>
+      </div>
+
+      <!-- 
+          Eingabegruppe für die Matrikelnummer.
+          Wird nur angezeigt, wenn die Rolle 'Student/in' ausgewählt ist.
+        -->
+      <div class="form-group" id="fg-student">
+        <label for="matrikel">Matrikelnummer</label>
+        <input autocomplete="off" class="input" id="matrikel" inputmode="numeric" name="matrikel" type="text" />
+      </div>
+
+      <!-- 
+          Eingabegruppe für Mitarbeiternummer oder Benutzername.
+          Sichtbar für interne Rollen (Mitarbeiter, Dozenten, etc.).
+        -->
+      <div class="form-group" id="fg-employee">
+        <label for="mitNr">Mitarbeiternummer/Benutzername</label>
+        <input autocomplete="off" class="input" id="mitNr" name="mitNr" type="text" />
+      </div>
+
+      <!-- 
+          Eingabegruppe für den Unternehmensnamen.
+          Nur relevant und sichtbar für die Rolle 'Partner Unternehmen'.
+        -->
+      <div class="form-group" id="fg-company">
+        <label for="company">Unternehmensname</label>
+        <input autocomplete="organization" class="input" id="company" name="company" type="text" />
+      </div>
+
+      <!-- Eingabefeld für das Passwort. -->
+      <div class="form-group">
+        <label for="password">Passwort</label>
+        <input autocomplete="current-password" class="input" id="password" name="password" required type="password" />
+      </div>
+
+      <div aria-live="polite" class="visually-hidden" id="auth-errors"></div>
+
+      <button class="btn primary" type="submit">Bestätigen</button>
+    </form>
+  </dialog>
+
+  <!-- 
+      Einbinden der Skripte:
+      - cd-select.js: Logik für das benutzerdefinierte Auswahlmenü.
+      - auth-popup.js: Hauptlogik für das Popup und die Authentifizierung.
+    -->
+  <script defer src="../js/ui/cd-select.js"></script>
+  <script type="module" src="../js/ui/auth-popup.js"></script>
+</body>
+
+</html>

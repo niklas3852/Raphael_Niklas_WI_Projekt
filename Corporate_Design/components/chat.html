@@ -1,0 +1,37 @@
+<!-- 
+  Komponente: Chat-Widget
+  Zweck: Ein aufklappbares Chat-Fenster für den Support oder KI-Assistenten.
+-->
+<div class="chat-widget">
+  <!-- Button zum Öffnen/Schließen des Chats -->
+  <button id="chat-toggle" class="chat-toggle" aria-label="Chat öffnen">
+    💬
+  </button>
+
+  <!-- Hauptcontainer des Chat-Fensters -->
+  <div class="chat-container" id="chat-container">
+    <!-- Kopfzeile mit Titel und Schließen-Button -->
+    <div class="chat-header">
+      <span>💬 ChatBot</span>
+      <button id="chat-close" class="chat-close" aria-label="Chat schließen">
+        ✕
+      </button>
+    </div>
+
+    <!-- Bereich für die Chat-Nachrichten -->
+    <div class="chat-messages" id="chat-output"></div>
+
+    <!-- Eingabebereich für neue Nachrichten -->
+    <div class="chat-input-area">
+      <textarea id="chat-input" rows="2" placeholder="Nachricht eingeben..."></textarea>
+      <button id="send-btn" class="btn primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Logik für das Chat-Widget -->
+<script src="../js/ui/chat.js"></script>

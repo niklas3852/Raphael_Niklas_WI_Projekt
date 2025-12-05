@@ -1,0 +1,81 @@
+/* =========================================
+   Datei: imprint.css
+   Zweck: Spezifische Styles für das Impressum (z.B. Popup, Blocksatz).
+   ========================================= */
+
+/* Blocksatz */
+.card p {
+  width: 90%;
+  overflow-wrap: break-word;
+  white-space: normal;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* Abstand zwischen den cards  */
+.card+.card {
+  margin-top: var(--space-8);
+}
+
+/* Abstand zwischen Barrierefreiheit card & letzter Aktualisierung  */
+.container+.container {
+  margin-top: var(--space-1);
+  padding-top: 0;
+}
+
+/* Moderne Zahlen  */
+html,
+body,
+#content,
+#content p,
+#content a[href^="tel"] {
+  font-variant-numeric: lining-nums !important;
+  /* nur moderne Ziffern */
+  font-feature-settings: "zero" 0, "ss01" 0 !important;
+  /* slashed zero AUS */
+}
+
+
+/* -- Popup -- */
+
+.popup {
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  margin: auto;
+}
+
+.popup::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Sicherheitsnetz */
+[hidden] {
+  display: none !important;
+}
+
+/* Schließen-Button */
+#close-popup {
+  margin-top: var(--space-4);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+  /* übernimmt Schrift vom Text */
+  padding: 0;
+}
+
+.link-button:hover {
+  text-decoration: none;
+}

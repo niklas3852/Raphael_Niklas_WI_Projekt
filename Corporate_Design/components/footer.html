@@ -1,0 +1,132 @@
+<!-- 
+  Komponente: Footer
+  Zweck: Seitenfuß mit Links, Social Media Icons und Kontaktformular-Modal.
+-->
+<footer class="wi-footer">
+  <!-- 
+    Button zum Öffnen des Kontakt-Modals. 
+    'aria-controls' verweist auf die ID des Dialog-Elements.
+  -->
+  <button class="wi-footer__octo-btn" aria-controls="octo-modal" aria-label="Oktopus öffnen"></button>
+  <!-- Navigiert zum Seitenanfang -->
+  <a href="#" class="wi-backtotop" aria-label="Nach oben" title="Nach oben">
+    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 19V5M12 5l-6 6M12 5l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" />
+    </svg>
+  </a>
+
+  <div class="wi-footer__content">
+    <!-- 1. Zeile – Quicklinks -->
+    <div class="wi-footer__quicklinks">
+      <a href="https://moodle.heilbronn.dhbw.de/login/">Moodle</a>
+      <a href="https://dualis.dhbw.de/">Dualis</a>
+      <a href="https://www.heilbronn.dhbw.de/downloads/">DHBW Downloads</a>
+    </div>
+
+    <!-- 2. Zeile – Social Icons -->
+    <div class="wi-footer__socials">
+      <a href="https://www.instagram.com/dhbwheilbronn" target="_blank" class="instagram-icon"
+        aria-label="Instagram"></a>
+      <a href="https://www.linkedin.com/school/dhbw-heilbronn/" target="_blank" class="linkedin-icon"
+        aria-label="LinkedIn"></a>
+      <a href="https://www.facebook.com/dhbwheilbronn" target="_blank" class="facebook-icon" aria-label="Facebook"></a>
+      <a href="https://www.youtube.com/@dhbwheilbronn" target="_blank" class="youtube-icon" aria-label="YouTube"></a>
+    </div>
+
+    <!-- Grauer Strich -->
+    <hr class="wi-footer__divider" />
+
+    <!-- 3. Zeile – Datenschutz & Impressum -->
+    <div class="wi-footer__links">
+      <a href="Corporate_Design/data_protection.html">Datenschutz</a>
+      <a href="Corporate_Design/imprint.html">Impressum</a>
+    </div>
+  </div>
+
+  <!-- 4. Zeile – Made by -->
+  <p class="wi-footer__credit">made by WI24A3</p>
+
+  <!-- Logik für den Footer (z.B. Modal-Steuerung) -->
+  <script src="../js/ui/footer.js" defer></script>
+
+  <!-- Modal / Formular  -->
+  <dialog id="octo-modal" class="modal" aria-labelledby="octo-modal-title">
+    <div class="modal__dialog">
+      <button class="modal__close" aria-label="Schließen">×</button>
+
+      <h2 id="octo-modal-title">Kontaktformular</h2>
+      <p>
+        Bei Fragen füllen Sie einfach das nachstehende Kontaktformular aus und
+        wir setzen uns mit Ihnen in Verbindung.
+      </p>
+
+      <!-- Ansprechpartner -->
+      <!-- 
+        Kontaktformular mit 'novalidate', um die Browser-Validierung zu deaktivieren 
+        und stattdessen eigene Styles/Logik (in footer.js) zu verwenden.
+      -->
+      <form id="contact-form" class="contact-form" novalidate>
+        <div class="form-row">
+          <label for="cf-ansprechpartner" class="label">Ansprechpartner <span aria-hidden="true">*</span></label>
+          <select id="cf-ansprechpartner" name="ansprechpartner" class="select" required>
+            <option value disabled selected>Bitte auswählen …</option>
+            <option value="studiengangsleitung">Studiengangsleitung</option>
+            <option value="frau_koch">Frau Koch</option>
+            <option value="sekretariat">Sekretariat</option>
+          </select>
+        </div>
+
+        <!-- Anrede -->
+        <div class="form-row">
+          <span class="label">Anrede <span aria-hidden="true">*</span></span>
+          <div class="control-inline" role="radiogroup" aria-label="Anrede">
+            <label class="radio"><input type="radio" name="anrede" value="m" required /><span>männlich</span></label>
+            <label class="radio"><input type="radio" name="anrede" value="w" /><span>weiblich</span></label>
+            <label class="radio"><input type="radio" name="anrede" value="d" /><span>divers</span></label>
+          </div>
+        </div>
+
+        <!-- Vorname -->
+        <div class="form-row">
+          <label for="cf-firstname" class="label">Vorname <span aria-hidden="true">*</span></label>
+          <input type="text" id="cf-firstname" name="firstname" class="input" required placeholder="Ihr Vorname" />
+        </div>
+
+        <!-- Nachname -->
+        <div class="form-row">
+          <label for="cf-lastname" class="label">Nachname <span aria-hidden="true">*</span></label>
+          <input type="text" id="cf-lastname" name="lastname" class="input" required placeholder="Ihr Nachname" />
+        </div>
+
+        <!-- Ihre Nachricht -->
+        <div class="form-row">
+          <label for="cf-message" class="label">Ihre Nachricht <span aria-hidden="true">*</span></label>
+          <textarea id="cf-message" name="message" class="textarea" rows="5" required
+            placeholder="Ihre Nachricht ..."></textarea>
+        </div>
+
+        <!-- Einwilligungserklärung -->
+        <div class="form-row">
+          <div class="label">
+            Einwilligungs<wbr />erklärung <span aria-hidden="true">*</span>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" id="cf-consent" name="consent" class="input" required />
+            <span>Ich willige ein, dass die DHBW die von mir bereitgestellten
+              Daten
+              zur Kontaktaufnahme elektronisch speichert und verarbeitet. Die
+              detaillierten Informationen gemäß DSGVO zur Datenverarbeitung habe
+              ich zur Kenntnis genommen.</span>
+          </label>
+        </div>
+
+        <!-- Pflichtfeld / Absenden Knopf -->
+        <div class="modal__actions">
+          <span class="help">*Pflichtfeld</span>
+          <button type="submit" class="btn primary">Absenden</button>
+        </div>
+      </form>
+    </div>
+    </div>
+</footer>

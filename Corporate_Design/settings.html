@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Grundlegende Seiteneinstellungen und Metadaten -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einstellungen</title>
+    <link rel="stylesheet" href="./css/corporate-design.css" />
+    <link rel="stylesheet" href="./css/settings.css">
+
+    <!-- Importieren der Corporate Design Hilfsfunktionen -->
+    <script type="module">
+        import { loadCorporateDesignAssets } from "./js/path-helper.js";
+        loadCorporateDesignAssets();
+    </script>
+    <!-- Authentifizierungsschutz -->
+    <script type="module" src="./js/auth-guard.js" data-auth-guard></script>
+    <!-- hier alle erlaubten Rollen eintragen, für `alle Rollen erlaubt` einfach leer lassen bzw. weglassen-->
+    <script type="module" src="./js/ui/include.js"></script>
+</head>
+
+<body>
+    <!-- Platzhalter für Header und Chat, die dynamisch geladen werden -->
+    <div data-include="header"></div>
+    <div data-include="chat"></div>
+    <!-- Hauptcontainer für die Einstellungen -->
+    <main class="container settings-page">
+        <h1>Einstellungen</h1>
+
+        <!-- 1) E-Mail -->
+
+        <section class="settings-group">
+            <h2 class="settings-heading">E-Mail</h2>
+
+            <div class="settings-row">
+                <!-- Readonly "Container" -->
+                <div class="email-container">
+                    user@example.com
+                </div>
+
+                <!-- Kopier-Button -->
+                <button class="copy-btn" aria-label="E-Mail kopieren">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4
+               a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+                <!--
+                    Hinweis:
+                    Aktuell wird hier eine Beispiel-E-Mail ("user@example.com") angezeigt.
+                    Später muss dieser Wert dynamisch aus dem Shibboleth-Login
+                    bzw. dem angemeldeten Benutzerkonto geladen werden. 
+                    -->
+
+            </div>
+
+        </section>
+
+        <!-- 2) Betriebsansprechpartner ändern -->
+
+        <section class="settings-group">
+            <h2 class="settings-heading">Betriebsansprechpartner ändern</h2>
+
+            <!-- Name -->
+            <div class="settings-field">
+                <label class="label" for="contact-name">Name des
+                    Ansprechpartners</label>
+                <div class="settings-row">
+                    <input class="input settings-input" id="contact-name" name="contact-name" type="text"
+                        value="Max Mustermann" data-initial-value="Max Mustermann" />
+                    <button class="btn primary settings-save-btn" type="button" data-save-for="#contact-name"
+                        aria-label="Änderung am Ansprechpartner-Namen speichern" hidden>
+                        ✓
+                    </button>
+                </div>
+            </div>
+
+            <!-- E-Mail des Ansprechpartners -->
+            <div class="settings-field">
+                <label class="label" for="contact-email">E-Mail des
+                    Ansprechpartners</label>
+                <div class="settings-row">
+                    <input class="input settings-input" id="contact-email" name="contact-email" type="email" required
+                        value="ansprechpartner@example.com" data-initial-value="ansprechpartner@example.com" />
+                    <button class="btn primary settings-save-btn" type="button" data-save-for="#contact-email"
+                        aria-label="Änderung an der Ansprechpartner-E-Mail speichern" hidden>
+                        ✓
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3) Passwort ändern -->
+
+        <section class="settings-group">
+
+            <a class="settings-link" href="mailto:support@heilbronn.dhbw.de?subject=Passwort%20ändern">
+                Passwort ändern
+            </a>
+
+            <!-- Wenn man über Shibboleth sein Passwort zurücksetzten möchte, schreibt man aktuell eine E-Mail an folgende E-Mail-Adress: support@heilbronn.dhbw.de -->
+
+        </section>
+
+        <!-- Skript für Einstellungs-spezifische Interaktionen -->
+        <script type="module" src="./js/ui/settings.js"></script>
+
+    </main>
+    <!-- Platzhalter für den Footer, der dynamisch geladen wird -->
+    <div data-include="footer"></div>
+
+</body>
+
+</html>

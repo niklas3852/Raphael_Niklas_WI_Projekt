@@ -1,0 +1,18 @@
+/* =========================================
+   Datei: data_protection.css
+   Zweck: Spezifische Styles für die Datenschutz-Seite (z.B. Blocksatz).
+   ========================================= */
+
+/* Blocksatz */
+.card p {
+  width: 90%;
+  overflow-wrap: break-word;
+  white-space: normal;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* Abstand zwischen den cards  */
+.card+.card {
+  margin-top: var(--space-8);
+}
