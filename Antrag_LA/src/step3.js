@@ -23,26 +23,22 @@ const pageLoader = initPageLoader({
     document.addEventListener("DOMContentLoaded", async () => {
 
         // ============================================================
-        // 1) URL PARAMETER + STORAGE LADEN
+        // 1) URL PARAMETER LADEN
         // ============================================================
-        const params = new URLSearchParams(window.location.search);
-        const storage = window.laStorage;
-        const storedStep1 = storage?.getSection?.('step1') || {};
-        const storedStep2 = storage?.getSection?.('step2') || {};
-        const storedStep3 = storage?.getSection?.('step3') || {};
+        let params = new URLSearchParams(window.location.search);
 
         let user = {
-            vorname: params.get("vorname") || storedStep1.vorname || "",
-            nachname: params.get("nachname") || storedStep1.nachname || "",
-            matrikel: params.get("matrikel") || storedStep1.matrikel || "",
-            kurs: params.get("kurs") || storedStep1.kurs || "",
-            studiengang: params.get("studiengang") || storedStep1.studiengang || "",
-            semester: params.get("semester") || storedStep1.semester || storedStep3.semester || "1",
-            vertiefung: params.get("vertiefung") || storedStep1.vertiefung || "",
-            zeitraum: params.get("zeitraum") || storedStep1.zeitraum || "",
-            studiengangsleitung: params.get("studiengangsleitung") || storedStep1.studiengangsleitung || "",
-            university: params.get("university") || storedStep2.university || "",
-            universityId: params.get("universityId") || storedStep2.universityId || ""
+            vorname: params.get("vorname") || "",
+            nachname: params.get("nachname") || "",
+            matrikel: params.get("matrikel") || "",
+            kurs: params.get("kurs") || "",
+            studiengang: params.get("studiengang") || "",
+            semester: params.get("semester") || "1",
+            vertiefung: params.get("vertiefung") || "",
+            zeitraum: params.get("zeitraum") || "",
+            studiengangsleitung: params.get("studiengangsleitung") || "",
+            university: params.get("university") || "",
+            universityId: params.get("universityId") || ""
         };
 
         let semester = parseInt(user.semester, 10) || 1;
@@ -109,26 +105,15 @@ const pageLoader = initPageLoader({
                 selectedCourses: Array.from(selectedCourseIds)
             };
 
-            if (storage?.saveSection) {
-                storage.saveSection('step3', statePayload);
-            }
+            const paramsForUrl = new URLSearchParams(params);
+            paramsForUrl.set('semester', String(semester));
+            paramsForUrl.set('partnerPage', String(partnerPage));
+            paramsForUrl.set('selectedCourses', JSON.stringify(Array.from(selectedCourseIds)));
 
-            const paramsForUrl = storage?.buildParams
-                ? storage.buildParams({ step3: statePayload })
-                : new URLSearchParams(window.location.search);
+            params = paramsForUrl;
 
-            if (!storage?.buildParams) {
-                paramsForUrl.set('semester', String(semester));
-                paramsForUrl.set('partnerPage', String(partnerPage));
-                paramsForUrl.set('selectedCourses', JSON.stringify(Array.from(selectedCourseIds)));
-            }
-
-            if (storage?.syncUrl) {
-                storage.syncUrl(paramsForUrl);
-            } else {
-                const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
-                window.history.replaceState({}, '', newUrl);
-            }
+            const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
+            window.history.replaceState({}, '', newUrl);
         }
 
 
@@ -488,14 +473,13 @@ const pageLoader = initPageLoader({
 
             const selected = Array.from(selectedCourseIds);
             const stepState = { semester, partnerPage, selectedCourses: selected };
-            if (storage?.saveSection) storage.saveSection('step3', stepState);
 
-            const newParams = storage?.buildParams
-                ? storage.buildParams({ step3: stepState })
-                : new URLSearchParams(window.location.search);
-            if (!storage?.buildParams) newParams.set("selectedCourses", JSON.stringify(selected));
+            const newParams = new URLSearchParams(params);
+            newParams.set("selectedCourses", JSON.stringify(selected));
+            newParams.set("semester", String(semester));
+            newParams.set("partnerPage", String(partnerPage));
 
-            if (storage?.syncUrl) storage.syncUrl(newParams);
+            window.laAllowUnload = true;
             window.location.href = "./step4.html?" + newParams.toString();
         });
 
@@ -505,6 +489,7 @@ const pageLoader = initPageLoader({
                 const params = new URLSearchParams(window.location.search);
                 params.delete("selectedCourses");
                 params.delete("semester");
+                window.laAllowUnload = true;
                 window.location.href = "./step2.html?" + params.toString();
             });
         });

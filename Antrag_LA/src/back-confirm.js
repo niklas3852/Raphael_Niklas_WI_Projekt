@@ -1,7 +1,7 @@
 // Intercept "Zurück" interactions and warn before leaving the current step.
 (function () {
     const BROWSER_BACK_MSG = 'Willst du wirklich die Seite verlassen? Eventuell gehen nicht gespeicherte Änderungen verloren.';
-    const storage = window.laStorage;
+    window.laAllowUnload = false;
 
     /**
      * Lädt das Stylesheet für die modale Rückfrage nach, falls es noch nicht eingebunden ist.
@@ -28,9 +28,7 @@
             url.pathname = url.pathname.replace(/step\d+\.html/i, `step${prevStep}.html`);
         }
 
-        if (storage?.buildParams) {
-            url.search = storage.buildParams().toString();
-        } else if (window.location.search) {
+        if (window.location.search) {
             url.search = window.location.search;
         }
 
@@ -82,6 +80,7 @@
         confirm.textContent = 'Zurückwechseln';
         confirm.addEventListener('click', () => {
             backdrop.remove();
+            window.laAllowUnload = true;
             setTimeout(() => { window.location.href = destination; }, 60);
         });
 
@@ -128,18 +127,11 @@
     }
 
     function installBrowserBackWarning() {
-        if (!window.history?.pushState) return;
-
-        window.history.pushState({ stay: true }, document.title, window.location.href);
-
-        window.addEventListener('popstate', (event) => {
-            if (!event.state || !event.state.stay) return;
-            const confirmed = window.confirm(BROWSER_BACK_MSG);
-            if (confirmed) {
-                window.history.back();
-            } else {
-                window.history.pushState({ stay: true }, document.title, window.location.href);
-            }
+        window.addEventListener('beforeunload', (event) => {
+            if (window.laAllowUnload) return;
+            event.preventDefault();
+            event.returnValue = BROWSER_BACK_MSG;
+            return BROWSER_BACK_MSG;
         });
     }
 
