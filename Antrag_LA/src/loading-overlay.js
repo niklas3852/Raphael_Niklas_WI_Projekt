@@ -25,7 +25,9 @@ function waitForDocumentReady() {
 }
 
 export function waitForImages(scope = document) {
-    const images = Array.from(scope.images || []);
+    const images = Array.from(
+        scope?.images ?? (scope?.querySelectorAll ? scope.querySelectorAll('img') : [])
+    );
     if (!images.length) return Promise.resolve();
 
     const loaders = images.map(img => {
@@ -43,7 +45,8 @@ export function initPageLoader({
     message = 'Wir bereiten deine Seite vor...',
     subline = 'Alle Inhalte werden im Hintergrund geladen.',
     minimumDuration = 600,
-    maxWait = 10000
+    maxWait = 10000,
+    imageScope = document
 } = {}) {
     const overlay = ensureLoaderMarkup(message, subline);
     const startedAt = performance.now();
@@ -70,9 +73,9 @@ export function initPageLoader({
     async function finish(extraPromises = []) {
         const tasks = [
             waitForDocumentReady(),
-            waitForImages(document),
+            imageScope ? waitForImages(imageScope) : null,
             ...extraPromises.filter(Boolean)
-        ].map(promise => Promise.resolve(promise).catch(err => {
+        ].filter(Boolean).map(promise => Promise.resolve(promise).catch(err => {
             console.error('Fehler während des Ladens erkannt. Führe trotzdem fort.', err);
             return null;
         }));

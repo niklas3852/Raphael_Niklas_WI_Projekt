@@ -5,6 +5,17 @@
         return window.dhbwStudiengaenge || {};
     }
 
+    function getSelectedSemester() {
+        try {
+            const state = JSON.parse(window.name || "{}") || {};
+            const semester = Number(state?.step1Data?.semester);
+            return Number.isFinite(semester) ? semester : null;
+        } catch (e) {
+            console.warn("Semester aus Zustand konnte nicht gelesen werden:", e);
+            return null;
+        }
+    }
+
     function normalizeKeys(str) {
         return (str || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
     }
@@ -70,10 +81,16 @@
 
         const payload = await response.json();
         const store = {};
+        const selectedSemester = getSelectedSemester();
 
         payload.forEach(unit => {
             const { semester, studiengangKey, vertiefungKey } = extractMetaFromModuleNr(unit.ModuleNr, unit.SemesterNr);
             if (!studiengangKey) return;
+
+            const normalizedSemester = semester ? Number(semester) : null;
+            if (selectedSemester && normalizedSemester && normalizedSemester !== selectedSemester) {
+                return;
+            }
 
             const program = ensureProgramContainer(store, studiengangKey);
             if (!program) return;

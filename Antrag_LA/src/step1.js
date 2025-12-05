@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!value) {
                 matrikel.setCustomValidity('Bitte Matrikelnummer eingeben.');
-                if (matrikelError) matrikelError.textContent = 'Dieses Pflichtfeld darf nicht leer sein.';
+                if (matrikelError) matrikelError.textContent = '';
             } else if (!digitsOnly) {
                 matrikel.setCustomValidity('Bitte nur Ziffern verwenden.');
                 if (matrikelError) matrikelError.textContent = 'Matrikelnummern dürfen ausschließlich aus Zahlen bestehen.';
