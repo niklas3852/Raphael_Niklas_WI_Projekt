@@ -24,7 +24,6 @@ paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
 
 const params = new URLSearchParams(window.location.search);
-const storage = window.laStorage;
 
 const continentWrapper = document.createElement("div");
 continentWrapper.id = "continent-result-wrapper";
@@ -61,11 +60,16 @@ const gap = 12;
 let activeContinent = null;
 const ROWS_PER_PAGE = 2;
 
-function appendStoredUserParams(targetParams) {
-    const storedStep1 = storage?.getSection?.('step1') || {};
-    const storedStep2 = storage?.getSection?.('step2') || {};
+const backLink = document.querySelector('.step1-nav #back');
+if (backLink) {
+    const backParams = params.toString();
+    const target = backParams ? `./step1.html?${backParams}` : './step1.html';
+    backLink.setAttribute('href', target);
+}
+
+function appendUserParams(targetParams) {
     const keys = ['vorname', 'nachname', 'matrikel', 'kurs', 'studiengang', 'semester', 'vertiefung', 'studiengangsleitung', 'zeitraum'];
-    keys.forEach(key => targetParams.set(key, params.get(key) || storedStep1[key] || storedStep2[key] || ''));
+    keys.forEach(key => targetParams.set(key, params.get(key) || ''));
 }
 
 let activePage = 1;
@@ -483,6 +487,7 @@ function showCityInfo(city) {
     // 🔹 Back-Button: Seite komplett neu laden
     const backBtn = infoEl.querySelector(".back-btn");
     backBtn.addEventListener("click", () => {
+        window.laAllowUnload = true;
         location.reload();
     });
 
@@ -510,10 +515,8 @@ function selectUniversity(city) {
     // ----------------------------------------------------
     // URL-Parameter auslesen
     // ----------------------------------------------------
-    const params = storage?.buildParams
-        ? storage.buildParams({ step2: { university: city.name, universityId: city.id } })
-        : new URLSearchParams(window.location.search);
-    appendStoredUserParams(params);
+    const params = new URLSearchParams(window.location.search);
+    appendUserParams(params);
 
     // ----------------------------------------------------
     // Falls schon vorhanden → überschreiben
@@ -523,18 +526,12 @@ function selectUniversity(city) {
     params.set("university", city.name);
     params.set("universityId", city.id);
 
-    if (storage?.saveSection) {
-        storage.saveSection('step2', { university: city.name, universityId: city.id });
-        if (storage?.syncUrl) {
-            storage.syncUrl(params);
-        }
-    }
-
     // ----------------------------------------------------
     // Button → Weiterleitung mit ALLEN Parametern
     // ----------------------------------------------------
     if (continueBtn) {
         continueBtn.onclick = () => {
+            window.laAllowUnload = true;
             window.location.href = "./step3.html?" + params.toString();
         };
     }
@@ -660,9 +657,8 @@ function createCarouselControls() {
 }
 
 function restoreSelectionFromParams() {
-    const storedStep2 = storage?.getSection?.('step2') || {};
-    const savedId = params.get('universityId') || storedStep2.universityId;
-    const savedName = params.get('university') || storedStep2.university;
+    const savedId = params.get('universityId');
+    const savedName = params.get('university');
     if (!savedId && !savedName) return;
     const match = cities.find(c => (savedId && c.id === savedId) || c.name === savedName);
     if (match) showCityInfo(match);

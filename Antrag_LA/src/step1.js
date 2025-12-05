@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateRangeInput = document.getElementById("date-range-picker");
 
-    const storage = window.laStorage;
     const urlParams = new URLSearchParams(window.location.search);
     const paramData = {
         vorname: urlParams.get('vorname') || '',
@@ -33,8 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         studiengangsleitung: urlParams.get('studiengangsleitung') || '',
         zeitraum: urlParams.get('zeitraum') || ''
     };
-    const storedData = (storage?.getSection?.('step1')) || {};
-    const initialData = { ...storedData, ...paramData };
+    const initialData = { ...paramData };
 
     const matrikelError = document.getElementById("matrikel-error");
 
@@ -107,16 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function persistFormData() {
         const payload = collectFormData();
 
-        if (storage?.saveSection && storage?.buildParams && storage?.syncUrl) {
-            storage.saveSection('step1', payload);
-            const params = storage.buildParams({ step1: payload });
-            storage.syncUrl(params);
-            return;
-        }
-
-        const paramsFallback = new URLSearchParams(window.location.search);
-        Object.entries(payload).forEach(([key, value]) => paramsFallback.set(key, value || ""));
-        const newUrl = `${window.location.pathname}?${paramsFallback.toString()}`;
+        const params = new URLSearchParams(window.location.search);
+        Object.entries(payload).forEach(([key, value]) => params.set(key, value || ""));
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState({}, "", newUrl);
     }
 
@@ -228,10 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildUrlParams() {
         const data = collectFormData();
-        if (storage?.buildParams) {
-            return storage.buildParams({ step1: data }).toString();
-        }
-        const params = new URLSearchParams();
+        const params = new URLSearchParams(window.location.search);
         Object.entries(data).forEach(([key, value]) => params.set(key, value || ""));
         return params.toString();
     }
@@ -255,6 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const baseHref = nextBtn.getAttribute("href") || "./step2.html";
             const finalUrl = `${baseHref}?${buildUrlParams()}`;
 
+            window.laAllowUnload = true;
             window.location.href = finalUrl;
         });
     }
