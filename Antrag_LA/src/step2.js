@@ -7,6 +7,14 @@ const pageLoader = initPageLoader({
     subline: 'Karten, Bilder und Daten werden im Hintergrund vorbereitet.'
 });
 
+const finalizeLoader = () => pageLoader.finish([waitForImages(document)]);
+
+if (document.readyState === "complete") {
+    finalizeLoader();
+} else {
+    window.addEventListener("load", finalizeLoader, { once: true });
+}
+
 const welcomeTextEl = document.getElementById("welcome-text");
 const welcomeContainer = document.getElementById("welcome-city-container");
 const cityListEl = document.getElementById("city-list");
@@ -686,4 +694,3 @@ setupGlobalCarousel();
 restoreSelectionFromStorage();
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
-pageLoader.finish([waitForImages(document)]);
