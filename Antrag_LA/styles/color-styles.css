@@ -1,0 +1,15 @@
+:root {
+    --background-color: #ffecec;
+    --red-heading: indianred;
+    --black-heading: black;
+    --black-general-writing: black;
+
+    --timeline-label: #fff;
+    --timeline-item-deactivated: #bbb;
+    --timeline-line: #ff6a6a;
+    --timeline-dot: #fff;
+    --timeline-dot-border: white;
+    --timeline-dot-active: white;
+    --timeline-dot-svg: #ff6a6a;
+    --timeline-dot-deactivated: ghostwhite;
+}

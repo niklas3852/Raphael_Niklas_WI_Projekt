@@ -1,0 +1,330 @@
+/* styles/fourth_step.css
+   Spezielle Styles für die Step4-Vorschau + Druck (A4) - Strikte Word-Emulation
+*/
+
+/* --- Preview Layout (Screen Only) --- */
+.preview-layout-centered {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+/* Main PDF Container: DIN A4 Maße, elegante Schriftarten */
+.pdf-preview {
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    border-radius: 0;
+    padding: 3rem 4rem; /* DIN A4 Ränder simulieren (ca. 20mm) */
+    min-height: 842px;
+    width: 794px; /* Breite eines A4-Dokuments bei 96 DPI */
+    max-width: 90vw;
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Standard-Schriftart */
+    font-size: 11pt;
+    color: #000;
+    line-height: 1.4;
+
+    position: relative;
+}
+
+/* --- Document Header (Minimalistisch) --- */
+.pdf-preview .la-logo-outside {
+    width: 7.5rem;
+    height: 7.5rem;
+    object-fit: contain;
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    z-index: 10;
+}
+
+.pdf-preview .la-header {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: center;
+    margin-bottom: 39px;
+    padding-bottom: 0;
+    line-height: 1.5rem;
+}
+.pdf-preview .la-h-content {
+    text-align: left;
+    margin: 0;
+    margin-right: 20%;
+}
+.pdf-preview h2 {
+    margin: 0 0 5px 0;
+    /* GEÄNDERT: Neue Script-Schriftart */
+    font-family: "Domine", serif;
+    font-size: 20pt;
+    font-weight: normal;
+    color: #000;
+    /* GEÄNDERT: Script-Fonts sehen in Großbuchstaben oft schlecht aus */
+    text-transform: none;
+    letter-spacing: 0.5px;
+    line-height: 1.1; /* Etwas engerer Zeilenabstand */
+}
+/* Sub-Text: Bestätigung & Anerkennung... */
+.pdf-preview .la-sub {
+    color: #333;
+    font-size: 10pt;
+    margin-top: 0;
+    font-weight: normal;
+}
+
+/* --- Metadaten (DIV-Struktur ohne Linien) --- */
+.la-meta-data {
+    margin: 25px 0 25px 0;
+    padding: 5px 0;
+    font-size: 10pt;
+    text-align: left;
+}
+.la-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+.la-meta-col {
+    flex: 1 1 50%;
+    min-width: 300px;
+}
+.meta-item {
+    display: flex;
+    justify-content: space-between;
+    /* --- ENTFERNT: border-bottom: 1px dotted #ccc; */
+    padding: 3px 0;
+}
+.la-meta-col:first-child .meta-item {
+    padding-right: 15px;
+}
+.la-meta-col:last-child .meta-item {
+    padding-left: 15px;
+}
+/* Entfernte das Entfernen der letzten Linie, da jetzt alle Linien weg sind */
+
+
+.meta-label {
+    flex-shrink: 0;
+    padding-right: 5px;
+    line-height: 1.25rem;
+}
+.meta-label-de {
+}
+.meta-label-en {
+    font-style: italic;
+    font-size: 9pt;
+    display: block;
+}
+.meta-value-placeholder {
+    font-style: italic;
+    color: #333;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    text-align: right;
+    flex-grow: 1;
+}
+
+
+/* --- Modul-Zuordnungs-Tabelle (mit 4 Spalten) --- */
+.la-courses h3 {
+    margin: 39px 0 10px 0;
+    border-bottom: none;
+    padding-bottom: 0;
+    font-weight: bold;
+    font-size: 12pt;
+}
+
+.mapping-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+    font-size: 10pt;
+    table-layout: fixed;
+    page-break-inside: auto;
+}
+.mapping-table th, .mapping-table td {
+    border: 1px solid #000;
+    padding: 3px 6px;
+    text-align: left;
+    vertical-align: middle;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    /* NEU: Für bessere Silbentrennung */
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+}
+.mapping-table thead th {
+    background: #e0e0e0;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Spaltenbreiten für 4 Spalten anpassen: 50% für DHBW/Partner, geteilt in 40% (Modul) und 10% (ECTS) */
+.mapping-table thead th:nth-child(1) { width: 50%; } /* DHBW-Abschnitt */
+.mapping-table thead th:nth-child(2) { width: 50%; } /* Partner-Abschnitt */
+.mapping-table thead tr:nth-child(2) th:nth-child(1) { width: 40%; } /* Module/Unit */
+.mapping-table tr td:nth-child(1) { width: 40%; }
+.mapping-table thead tr:nth-child(2) th:nth-child(2) { width: 10%; } /* ECTS DHBW */
+.mapping-table tr td:nth-child(2) { width: 10%; }
+.mapping-table thead tr:nth-child(2) th:nth-child(3) { width: 40%; } /* Courses/Alternatives */
+.mapping-table tr td:nth-child(3) { width: 40%; }
+.mapping-table thead tr:nth-child(2) th:nth-child(4) { width: 10%; } /* ECTS Partner */
+.mapping-table tr td:nth-child(4) { width: 10%; }
+
+
+.mapping-table .map-header-de { font-weight: bold; font-size: 10pt; }
+.mapping-table .map-header-en { font-style: italic; font-size: 9pt; }
+.mapping-table .total-credits { background: #e0e0e0; font-weight: bold; }
+
+/* Kursdetails in der Tabelle */
+.course-name-in-table {
+    font-weight: normal;
+    color: #000;
+    word-break: break-all;
+    overflow-wrap: break-word;
+}
+.course-ects-in-table { font-style: italic; color: #555; font-size: 9pt; }
+
+
+/* --- Hinweise Sektion (Textblöcke - KEINE ÄNDERUNG HIER) --- */
+.la-note-section {
+    margin-top: 25px;
+    font-size: 10pt;
+}
+.la-note-section strong {
+    font-weight: bold;
+    font-size: 12pt;
+    margin-bottom: 5px;
+    display: block;
+}
+.la-note-section p {
+    margin: 5px 0;
+    text-indent: -10px;
+    padding-left: 10px;
+}
+
+
+/* --- Unterschriften-Tabelle (Word-Tabelle 3 - KEINE ÄNDERUNG HIER) --- */
+.signature-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 40px;
+    font-size: 10pt;
+    table-layout: fixed;
+    page-break-inside: avoid;
+}
+.signature-table td {
+    border: 1px solid #000;
+    padding: 5px 8px;
+    vertical-align: top;
+    height: 10px;
+}
+.signature-table .sig-label-de { font-weight: bold; }
+.signature-table .sig-label-en { font-style: italic; font-size: 9pt; }
+.signature-table .sig-header { background-color: #eee; font-weight: bold; text-align: center; }
+.signature-table .sig-confirm-cell { background-color: #f0f0f0; }
+
+
+/* --- DRUCK MEDIA QUERY (DIN A4 FIX) --- */
+@media print {
+    @page {
+        size: A4;
+        margin: 20mm;
+        orphans: 4;
+        widows: 4;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        font-size: 11pt;
+    }
+
+    .pdf-preview {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        min-height: auto;
+    }
+
+    /* KORREKTUR: H2-Font im Print-Modus konsistent zur Screen-Vorschau halten */
+    .pdf-preview h2 {
+        margin: 0 0 5px 0;
+        font-family: "Domine", serif;
+        font-size: 20pt;
+        font-weight: normal;
+        color: #000;
+        text-transform: none;
+        letter-spacing: 0.5px;
+        line-height: 1.1;
+    }
+
+    .pdf-preview .la-sub {
+        font-size: 10pt;
+        color: #333 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    .pdf-preview .la-logo-outside {
+        top: 0;
+        right: 0;
+    }
+
+    /* Metadaten im Druck: Jetzt auch ohne Linien */
+    .la-meta-data {
+        border-top: none;
+        border-bottom: none;
+        padding: 5px 0;
+    }
+    .meta-item {
+        border-bottom: none;
+    }
+    /* Gesamteindruck der Metadaten ist nun sehr clean */
+
+
+    /* Alle Rahmen schwarz für den Druck */
+    .mapping-table th,
+    .mapping-table td,
+    .signature-table td {
+        border-color: #000 !important;
+    }
+    .mapping-table .total-credits,
+    .signature-table .sig-header,
+    .mapping-table thead th {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        background-color: #eee !important;
+    }
+
+    .la-note-section p { text-indent: -10px; padding-left: 10px; }
+}
+
+/* --- Alte PDF Unterschriften --- */
+
+.la-signatures-oldpdf {
+    margin-top: 40px;
+}
+
+.sig-old-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.sig-old-table td {
+    padding: 20px 10px;
+    vertical-align: bottom;
+}
+
+.sig-line {
+    width: 100%;
+    height: 1px;
+    background: #000;
+    margin-bottom: 5px;
+}
+
+.sig-label {
+    font-size: 10pt;
+    color: #000;
+    text-align: left;
+}

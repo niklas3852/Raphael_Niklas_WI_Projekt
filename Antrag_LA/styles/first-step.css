@@ -1,0 +1,509 @@
+/* Move Google Fonts import to the top for validity and precedence */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap");
+@import "color-styles.css";
+/* Pfadkorrektur: Corporate-Design CSS liegt eine Ebene höher in /Antrag_LA */
+@import "../corporate-design.css";
+
+:root {
+    --form-max-width: 900px;
+    --form-gap: 1rem;
+    --field-height: 3rem;
+    --field-padding-vertical: 0.55rem;
+    --field-padding-horizontal: 1rem;
+    --icon-size: 1.4rem;
+    --icon-offset: 0.6rem;
+    --field-radius: 10px; /* zentrale Variable für border-radius aller Felder */
+
+    /* Fallback-Defaults zuerst definieren */
+    --red-heading: #ff6a6a;
+
+    /* Corporate Design tokens (Sicherheits-Fallbacks hier, übernommen aus corporate-design.css)
+       Diese sorgen dafür, dass Variablen in diesem File auch ohne Resolve durch @import zur Verfügung stehen. */
+    --color-primary: #284791;
+    --color-primary-600: #1e3a78;
+    --color-primary-700: #142a5a;
+    --color-secondary: #2b3550;
+    --color-accent: #3b82f6;
+
+    /* Neutral tones */
+    --color-bg: #ffffff;
+    --color-surface: #ededed;
+    --color-border: #e5e7eb;
+    --color-muted: #6b7280;
+    --color-text: #111827;
+    --color-inverse: #ffffff;
+
+    /* Status colors (base) */
+    --color-success: #16a34a;
+    --color-warning: #ff8100;
+    --color-danger:  #dc2626;
+    --color-info:    #0ea5e9;
+
+    /* Status colors (derived) */
+    --success-bg: #ecfdf5;
+    --success-border: #a7f3d0;
+    --success-text: #065f46;
+
+    --info-bg: #eff6ff;
+    --info-border: #bfdbfe;
+    --info-text: #1e40af;
+
+    --warning-bg: #fffbeb;
+    --warning-border: #fde68a;
+    --warning-text: #92400e;
+
+    /* Radius & shadows */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 20px rgba(0,0,0,0.06);
+
+    /* Fonts & misc */
+    --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* Placeholder tokens */
+    --placeholder-color: #8892a6;
+    --placeholder-opacity: 1;
+
+    /* Accent: direkter Default, vermeidet Abhängigkeiten */
+    --accent: #ff6a6a;
+
+    /* Vars used for card text sizing — sensible defaults so linters can resolve them */
+    --card-width: 300px;
+    --text-size-offset: 0.2;
+}
+
+/* Formular-Container */
+.formular-box-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* zwei Spalten */
+    grid-template-rows: repeat(3, auto); /* drei Reihen */
+    gap: var(--form-gap);
+    max-width: var(--form-max-width);
+    width: 100%;
+    margin: 2rem auto;
+    padding: 1.25rem;
+    box-sizing: border-box;
+}
+
+/* Basis-Input (bewahrt bisherigen .corner-input Namen) */
+.corner-input {
+    width: 100%;
+    height: var(--field-height);
+    padding: var(--field-padding-vertical) var(--field-padding-horizontal);
+    font-size: 1rem;
+    border: 1.5px solid var(--color-primary, #2563eb);
+    border-radius: var(--field-radius);
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.corner-input:focus {
+    outline: none;
+    border-color: var(--color-primary, #2563eb);
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.12);
+}
+
+.corner-input[required]:not(:focus):invalid {
+    /* Setzt die Farbe auf ein helles Grau, wenn der leere Platzhalter-Wert ausgewählt ist */
+    color: #747474;
+}
+
+/* Entferne automatische Pseudo-Klassen-Markierung; steuere Validierung über Klassen */
+/* .corner-input:required:invalid { ... } */
+.corner-input:required:invalid {
+    /* früher: roter Rahmen über Pseudo-Klasse — jetzt deaktiviert, Styling erfolgt per JS-Klasse */
+}
+
+/* Klassenbasierte Validierungs-Stile (werden per JS gesetzt) */
+.corner-input.is-invalid,
+#date-range-picker.is-invalid,
+.input.date-range.is-invalid,
+.select.is-invalid {
+    border-color: var(--accent, #ff6a6a) !important;
+    box-shadow: 0 0 0 3px rgba(255, 106, 106, 0.16) !important;
+}
+
+.corner-input.is-valid,
+#date-range-picker.is-valid,
+.input.date-range.is-valid,
+.select.is-valid {
+    border-color: var(--color-primary, #284791) !important;
+    box-shadow: 0 0 0 3px rgba(40,71,145,0.06) !important;
+}
+
+/* Stil für gesperrte (readonly) Eingabefelder */
+.corner-input[readonly],
+.corner-input[aria-readonly="true"] {
+    background: #f3f4f6; /* leichtes Grau */
+    cursor: not-allowed;
+    color: #374151; /* etwas dunklerer Text */
+    border-color: var(--color-primary, #2563eb);
+    opacity: 0.98;
+}
+
+.corner-input[readonly]::placeholder,
+.corner-input[aria-readonly="true"]::placeholder {
+    color: #9ca3af; /* gedämpfte Platzhalter-Farbe */
+}
+
+/* Override: Kalender-Input soll klickbar aussehen, obwohl es readonly ist
+   (z.B. öffnet ein Date-Range-Picker). Entfernt das generelle "not-allowed" nur
+   für dieses spezifische Feld.) */
+#date-range-picker[readonly] {
+    cursor: pointer;
+}
+
+/* Field wrapper für Input + Icon */
+.field {
+    position: relative; /* für overlay icon */
+    width: 100%;
+    display: block; /* Block, füllt die Grid-Zelle */
+    grid-column: auto; /* Standard: belege eine einzelne Grid-Spalte */
+}
+
+/* Utility: Feld über beide Spalten (volle Formularbreite) */
+.field--full {
+    grid-column: 1 / -1;
+    /* Neu: zentrieren von Inhalt (z.B. Datumsauswahl) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Begrenze die Breite des zentrierten Inputs, damit es optisch mittig und nicht überbreit wirkt */
+.field--full .corner-input,
+.field--full #date-range-picker {
+    width: 100%;
+    max-width: 520px; /* angenehm lesbare Breite, kann bei Bedarf angepasst werden */
+    box-sizing: border-box;
+}
+
+/* Auf kleinen Bildschirmen sollen Felder wieder die volle Breite des Grids einnehmen */
+@media (max-width: 600px) {
+    .field--full {
+        display: block; /* Grid-Eintrag wieder normal darstellen */
+    }
+    .field--full .corner-input,
+    .field--full #date-range-picker {
+        max-width: none;
+        width: 100%;
+    }
+}
+
+/* Icon: rundes i */
+.field__icon {
+    position: absolute;
+    right: var(--icon-offset);
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--icon-size);
+    height: var(--icon-size);
+    border-radius: 50%;
+    background: var(--info-bg, #e5f0ff);
+    color: var(--color-info, #0ea5e9);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1px solid var(--info-border, #cde8ff);
+    cursor: pointer;
+    z-index: 1; /* stellt sicher, dass das Icon über normalen Content liegt */
+}
+
+/* Tooltip (via data-tooltip) */
+.field__icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: #fff;
+    padding: 0.35rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 10060; /* sehr hoch, sollte über fast allem liegen */
+}
+
+/* Wenn JS die Tooltips übernimmt, unterdrücke die Pseudo-Elemente, damit keine Doppel-Tooltips erscheinen */
+.js-tooltips .field__icon::after {
+    display: none !important;
+}
+
+/* Styles für body-angehängte Tooltips (JS-Fallback) */
+.body-tooltip {
+    position: fixed;
+    z-index: 2147483647; /* größtmöglicher z-index, sitzt über allem */
+    background: #111827;
+    color: #fff;
+    padding: 0.35rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.field__icon:hover::after,
+.field__icon:focus::after {
+    opacity: 1;
+}
+
+/* Hinweistext */
+.pflicht-hinweis {
+    grid-column: 1 / -1; /* über beide Spalten */
+    text-align: left;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Vereinheitliche den border-radius aller Formularelemente innerhalb des Formular-Containers */
+.formular-box-container input,
+.formular-box-container select,
+.formular-box-container textarea {
+    border-radius: var(--field-radius); /* gleiche Abrundung wie .corner-input */
+}
+
+/* Entferne bei Selects die native WebKit-Optik, damit border-radius einheitlich wirkt */
+.formular-box-container select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: none; /* falls native Pfeil kommt */
+    cursor: pointer; /* macht Selects als klickbar (Maussymbol: Hand) */
+}
+
+/* Deaktivierte Selects sollen weiterhin deutlich als nicht-klickbar erscheinen */
+.formular-box-container select[disabled],
+.formular-box-container select[aria-disabled="true"] {
+    cursor: not-allowed;
+}
+
+/* Responsive: Einspaltig auf kleinen Displays, Icon wird nicht overlay, Input füllt 100% */
+@media (max-width: 600px) {
+    .formular-box-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .field .corner-input {
+        padding-right: var(--field-padding-horizontal);
+    }
+
+    .field__icon {
+        position: relative;
+        right: auto;
+        top: auto;
+        transform: none;
+        margin-left: 0.5rem;
+    }
+
+    .pflicht-hinweis {
+        text-align: left;
+    }
+}
+
+/* Replace redundant 0px/0% units later in file */
+.card {
+    position: relative;
+    left: 0;
+    top: 0;
+    background-position: center;
+    background-size: cover;
+    box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px, rgba(0, 0, 0, 0.3) 0 7px 13px -3px, rgba(0, 0, 0, 0.2) 0 -3px 0 inset;
+}
+
+.card-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #FFFFFFDD;
+    padding-left: 16px;
+}
+
+/* Ensure font-family fallbacks */
+.info .text {
+    position: relative;
+    font-family: "Montserrat", sans-serif;
+    /* Fallback-Werte ergänzt, falls die Custom Properties nicht gesetzt sind */
+    font-size: calc(var(--card-width, 300px) * var(--text-size-offset, 0.2));
+    white-space: nowrap;
+    color: #fff;
+    width: fit-content;
+}
+
+.loading__wrapper .loader--text {
+    color: #fff;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    margin-bottom: 1.4rem;
+}
+
+.details .title-1,
+.details .title-2 {
+    font-weight: 600;
+    font-size: 72px;
+    font-family: "Oswald", sans-serif;
+}
+
+/* Date Picker */
+
+/* Grundstil für das Date-Range-Input, nutzt Corporate-Design Tokens */
+#date-range-picker,
+.date-range-picker,
+input[type="date"].corner-input,
+.input.date-range {
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--color-bg, #fff);
+    color: var(--color-text, #111827);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-md, 10px);
+    padding: 0.5rem 0.75rem;
+    height: var(--field-height, 3rem);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.06));
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    cursor: pointer; /* Eingabefeld wirkt klickbar, öffnet Kalender */
+}
+
+/* Placeholder-Farbe an Corporate-Token anpassen */
+#date-range-picker::placeholder,
+.input.date-range::placeholder,
+.corner-input::placeholder {
+    color: var(--placeholder-color, #8892a6);
+    opacity: var(--placeholder-opacity, 1);
+}
+
+/* Fokuszustand (sichtbarer Ring aus Corporate-Design) */
+#date-range-picker:focus-visible,
+.input.date-range:focus-visible,
+input[type="date"].corner-input:focus-visible {
+    outline: none;
+    border-color: var(--color-accent, #3b82f6);
+    box-shadow: var(--focus-ring, 0 0 0 3px rgba(59,130,246,0.25));
+}
+
+/* Falls das Feld readonly sein muss, aber trotzdem Klick öffnen soll, bleibt Cursor pointer */
+#date-range-picker[readonly] {
+    cursor: pointer;
+}
+
+/* Blue border for date picker input and popup to match corporate design */
+#date-range-picker,
+.date-range-picker,
+.input.date-range,
+.flatpickr-calendar,
+.pikaday,
+.datepicker,
+.datepicker-dropdown {
+    /* Nutze die definierte Corporate-Primary-Farbe; Fallback ebenfalls blau */
+    border: 1.5px solid var(--color-primary, #284791);
+    /* Dezentere Hintergrund beibehalten, aber mit blauem Schatten hervorheben */
+    box-shadow: 0 4px 14px rgba(40,71,145,0.06), 0 0 0 3px rgba(40,71,145,0.06);
+}
+
+/* Stärkerer Fokus-Ring für Tastaturfokus / sichtbaren Fokus */
+#date-range-picker:focus-visible,
+.input.date-range:focus-visible,
+input[type="date"].corner-input:focus-visible,
+.flatpickr-calendar:focus-visible,
+.datepicker:focus-visible {
+    outline: none;
+    border-color: var(--color-primary, #284791);
+    box-shadow: 0 0 0 5px rgba(40,71,145,0.12);
+}
+
+/* Styles für gängige Kalender-Popups (z.B. flatpickr / Pikaday) — optional, greift nur wenn die Klassen vorhanden sind */
+.flatpickr-calendar,
+.pikaday,
+.datepicker,
+.datepicker-dropdown {
+    background: var(--color-surface, #ededed);
+    color: var(--color-text, #111827);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-md, 10px);
+    box-shadow: var(--shadow-md, 0 6px 20px rgba(0,0,0,0.06));
+    padding: 0.5rem;
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    z-index: 9999;
+}
+
+.flatpickr-months,
+.flatpickr-month,
+.datepicker--nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem;
+    color: var(--color-text, #111827);
+}
+
+.flatpickr-weekdays {
+    color: var(--color-muted, #6b7280);
+}
+
+.flatpickr-day,
+.datepicker--day {
+    border-radius: var(--radius-sm, 6px);
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    margin: 2px;
+    display: inline-block;
+}
+
+.flatpickr-day:hover,
+.datepicker--day:hover {
+    background: rgba(59,130,246,0.08); /* leichter Akzent-Hover */
+    cursor: pointer;
+}
+
+.flatpickr-day.today,
+.datepicker--day.is-today {
+    background: var(--color-accent, #3b82f6);
+    color: var(--color-inverse, #fff);
+    font-weight: 600;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.datepicker--day.is-selected {
+    background: var(--color-primary, #284791);
+    color: var(--color-inverse, #fff);
+    box-shadow: none;
+}
+
+/* Range-Füllung (falls die Lib das unterstützt) */
+.flatpickr-day.inRange {
+    background: linear-gradient(90deg, rgba(40,71,145,0.08), rgba(59,130,246,0.06));
+    color: var(--color-text, #111827);
+}
+
+/* Schaltflächen innerhalb des Kalenders (z.B. Apply / Cancel) */
+.flatpickr-ranger .apply, .flatpickr-ranger .cancel,
+.datepicker .apply, .datepicker .cancel {
+    display: inline-flex;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-sm, 6px);
+    border: 1px solid var(--color-border, #e5e7eb);
+    background: var(--color-bg, #fff);
+    color: var(--color-text, #111827);
+}
+
+/* Responsive: kleiner Kalender auf sehr kleinen Bildschirmen */
+@media (max-width: 420px) {
+    .flatpickr-calendar,
+    .datepicker {
+        font-size: 0.9rem;
+    }
+    .flatpickr-day, .datepicker--day { width: 30px; height: 30px; line-height: 30px; }
+}

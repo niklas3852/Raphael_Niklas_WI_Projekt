@@ -1,0 +1,161 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap");
+@import "color-styles.css";
+@import "corporate-design.css";
+
+.login-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.login-card {
+    background: var(--color-bg-surface, #ffffff);
+    border-radius: var(--radius-card, 16px);
+    padding: 2rem;
+    width: 24rem;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow-card, 0 4px 8px rgba(0,0,0,0.08));
+}
+
+/* Eingabefelder */
+.corner-input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    background: #fff;
+    font-size: 1rem;
+    transition: border-color 140ms ease;
+    /* Use the same primary color and field-radius as in first-step.css */
+    border: 1px solid var(--color-primary, #284791);
+    border-radius: var(--field-radius, 10px);
+}
+
+.corner-input:focus {
+    outline: none;
+    border-color: var(--color-primary, #284791);
+}
+
+/* Container für die zentrierte Schrift */
+.welcome-header-container {
+    text-align: center;
+    padding: 1rem 1rem 0; /* Oben etwas mehr, an den Seiten für Mobile */
+    /* overflow: hidden; DIESE REGEL KANN ENTFERNT WERDEN, da keine Animation */
+}
+
+/* Der Willkommensgruß selbst */
+.welcome-title {
+    font-size: 3rem; /* Sehr groß für Desktop */
+    color: var(--color-primary); /* Farbe aus dem Corporate Design */
+    display: inline-block;
+    white-space: nowrap;
+    overflow: visible; /* Ändern, damit der Text nicht abgeschnitten wird */
+    border-right: none; /* Blauen, blinkenden Balken (Cursor) entfernen */
+    width: 100%; /* Stellt sicher, dass der gesamte Text sofort sichtbar ist */
+    animation: none;
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .welcome-title {
+        font-size: 2rem;
+        border-right: none;
+    }
+}
+
+/* Form Switch Tabs */
+.form-slider {
+    display: flex;
+    justify-content: center;
+    gap: 1fr;
+}
+
+.form-slider button {
+    background: transparent;
+    border: none;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    border-radius: 3rem;
+    cursor: pointer;
+    color: var(--color-text-primary);
+}
+
+.form-slider button.active {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+/* Formbereiche */
+.forms-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.form-content {
+    display: none;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.form-content.visible {
+    display: flex;
+}
+
+/* Passwort-vergessen-Link */
+.forgot-row {
+    text-align: right;
+}
+
+.forgot-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.forgot-btn:hover {
+    text-decoration: underline;
+}
+
+/* Buttons in der Card */
+.navigation-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px; /* Abstand wie bei Step Buttons */
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.navigation-buttons .btn {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-600));
+    color: var(--color-inverse);
+    padding: 10px 18px;
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+    min-width: 120px; /* Optional: Mindestbreite */
+}
+
+.navigation-buttons .btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+}
+
+.navigation-buttons .btn:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}

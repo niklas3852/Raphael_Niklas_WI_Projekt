@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Step 3 - Module</title>
+    <!-- SEO Meta Description -->
+    <meta name="author" content="DHBW Heilbronn - WI24A3">
+    <meta name="keywords" content="Learning Agreement, Anerkennung Learning Agreement, Auslandsstudium, DHBW">
+    <meta property="og:type" content="website">
+    <meta name="description" content="Step 3: Antrag Learning Agreement - Geben Sie Ihre Module ein">
+    <meta property="og:title" content="Step 3 - Module">
+    <meta property="og:description" content="Step 3: Antrag Learning Agreement - Geben Sie Ihre Module ein">
+
+    <script type="module">
+        import { loadCorporateDesignAssets } from "../../Corporate_Design/js/path-helper.js";
+        loadCorporateDesignAssets();
+    </script>
+
+    <link rel="stylesheet" href="../../Corporate_Design/css/corporate-design.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/third_step.css">
+    <link rel="stylesheet" href="../timeline-style.css">
+    <link rel="icon" href="../assets/pictures/favicon.ico" type="icon/x-icon">
+    <script type="module" src="../../Corporate_Design/js/ui/include.js"></script>
+    <script type="module" src="../../Corporate_Design/js/auth-guard.js" data-auth-guard data-roles="student,lecturer"></script> <!-- hier alle erlaubten Rollen eintragen, für `alle Rollen erlaubt` einfach leer lassen bzw. weglassen-->
+
+    <script src="../src/timeline.js" defer></script>
+</head>
+<body data-step="3">
+
+<div data-include="header"></div>
+<div data-include="chat"></div>     <!-- Corporate Design Header and chatbot -->
+
+
+<div class="upper-main-box-container">
+    <h1 class="upper-main-box">Antrag Learning Agreement für die Anerkennung<br>
+        von im Ausland erbrachten Studienleistungen</h1>
+</div>
+
+<main>
+    <div class="lower-main-box-container">
+        <div class="lower-main-box">
+
+            <!-- Timeline -->
+            <div class="timeline-wrapper">
+                <div class="timeline-bar-horizontal">
+                    <div class="timeline-item"><span class="timeline-dot">1</span><div class="timeline-label">Persönliche Daten</div></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item"><span class="timeline-dot">2</span><div class="timeline-label">Gasthochschule</div></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item"><span class="timeline-dot">3</span><div class="timeline-label">Module</div></div>
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item"><span class="timeline-dot">4</span><div class="timeline-label">Überprüfung</div></div>
+                </div>
+            </div>
+
+            <section class="modules-selection">
+
+                <!-- Neues Banner mit Bild + Overlay-Text -->
+                <div class="modules-banner">
+                    <div class="modules-banner-image-wrapper">
+                        <img src="../assets/pictures/dhbw_promo_image.jpg" alt="Module Banner" class="modules-banner-image">
+                        <div class="modules-banner-overlay">
+                            <div class="modules-banner-text">
+                                <h1 class="banner-greeting"><span id="user-fullname">{Vor- und Nachname}</span>,</h1>
+                                <p id="banner-description">hier kannst nun du deine Module für dein Auslandssemester auswählen!</p>
+                                <div id="banner-details" class="banner-details">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Neue Info-Karte: Zusammenfassung + Progress (oberhalb der Tabellen) -->
+                <!-- ZENTRIERTE PROGRESS-SECTION (50% width) -->
+                <div class="modules-info-centered">
+                    <!-- optional small summary card (keeps DHBW / Partner ects) -->
+                    <div class="info-card">
+                        <div class="info-row"><div class="info-label">DHBW ECTS gesamt</div><div class="info-value" id="dhbw-ects">0</div></div>
+                        <div class="info-row"><div class="info-label">Partner ECTS ausgewählt</div><div class="info-value" id="partner-ects">0</div></div>
+                    </div>
+
+                    <!-- Centered progress track -->
+                    <div class="progress-centered" role="group" aria-label="Fortschritt ECTS">
+                        <div class="progress-track-center" aria-hidden="true">
+                            <div id="ects-progress" class="progress-fill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <div class="progress-details">
+                            <div class="progress-percent-big" id="ects-percent">0%</div>
+                            <div class="progress-required-remaining">Benötigt: <span id="ects-required">0</span> ECTS — Verbleibend: <span id="ects-remaining">0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Selected courses list (user can remove with X) -->
+                    <div class="selected-courses">
+                        <h3>Ausgewählte Kurse</h3>
+                        <ul id="selected-courses-list" class="selected-courses-list"></ul>
+                    </div>
+                </div>
+
+                <div class="modules-table-wrapper">
+                    <div class="modules-left">
+                        <div class="modules-title">DHBW Heilbronn</div>
+                        <table id="dhbw-table" class="modules-table">
+                            <thead>
+                                <tr><th>Kurs</th><th>Beschreibung</th><th>ECTS</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="modules-right">
+                        <div class="modules-title" id="partner-title">Partneruniversität</div>
+                        <table id="partner-table" class="modules-table">
+                            <thead>
+                                <tr><th>Kurs</th><th>Beschreibung</th><th>ECTS</th><th>Auswählen</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <!-- Pagination container for partner courses (minimal, injected by JS) -->
+                        <div id="partner-pagination" class="partner-pagination" aria-label="Partnerkurse Navigation" style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:flex-end"></div>
+                    </div>
+                </div>
+
+                <div class="step-navigation-buttons step3-nav">
+                    <a href="./step2.html" class="btn" id="back">Zurück</a>
+                    <a id="to-step4" class="btn disabled" aria-disabled="true">Weiter</a>
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+</main>
+
+<div data-include="footer"></div>
+
+<!-- Daten & Scripts -->
+<script src="../db/university_data/dhbw_courses.js"></script>
+<script src="../db/university_data/compatible_courses.js"></script>
+<script src="../src/step3.js" type="module"></script>
+<script src="../src/login_registration.js" defer></script>
+<script src="../src/back-confirm.js" defer></script>
+
+</body>
+</html>

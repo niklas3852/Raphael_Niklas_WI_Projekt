@@ -1,0 +1,320 @@
+/* css */
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Regular.ttf) format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Italic.ttf) format("truetype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-ExtraLight.ttf) format("truetype");
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-ExtraLightItalic.ttf) format("truetype");
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Light.ttf) format("truetype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-LightItalic.ttf) format("truetype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Medium.ttf) format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-MediumItalic.ttf) format("truetype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-SemiBold.ttf) format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-SemiBoldItalic.ttf) format("truetype");
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Bold.ttf) format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-BoldItalic.ttf) format("truetype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-ExtraBold.ttf) format("truetype");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Next";
+    src: url(./assets/fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-ExtraBoldItalic.ttf) format("truetype");
+    font-weight: 800;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* =========================================
+   Utility: Font Weights
+   ========================================= */
+.font-extralight { font-weight: 200; }
+.font-light      { font-weight: 300; }
+.font-normal     { font-weight: 400; }
+.font-medium     { font-weight: 500; }
+.font-semibold   { font-weight: 600; }
+.font-bold       { font-weight: 700; }
+.font-extrabold  { font-weight: 800; }
+
+
+/* =========================================
+   Base
+   an Corporate Tokens angepasst
+   ========================================= */
+html, body {
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+html{
+    /* Avoid using 100vw here (can cause horizontal scrolling due to scrollbars). Use 100% instead. */
+    height: 100%;
+    width: 100%;
+}
+
+
+/* =========================================
+   Placeholder Header/Footer
+   nun Corporate-Alert-Farben
+   ========================================= */
+.placeholder_header,
+.placeholder_footer {
+    background-color: var(--info-bg);
+    color: var(--info-text);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    margin: 0;
+    font-size: var(--fs-xl);
+    text-align: center;
+}
+
+
+/* =========================================
+   Login / Box Layout
+   ========================================= */
+.login_upper-main-box-container,
+.upper-main-box-container,
+.lower-main-box-container {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-6) var(--space-8) 0 var(--space-8);
+    box-sizing: border-box;
+}
+
+.lower-main-box-container {
+    padding-bottom: var(--space-6);
+    gap: var(--space-4);
+}
+
+
+/* =========================================
+   Box Elemente
+   ersetzt Rot (#ffecec) durch Standard-Surface
+   ========================================= */
+.upper-main-box,
+.login_upper-main-box,
+.lower-main-box,
+.user-status-wrapper,
+.lower-main-box-content {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-radius: var(--radius-lg);
+    font-size: var(--fs-lg);
+    text-align: center;
+}
+
+
+/* Einzelne Varianten */
+.upper-main-box,
+.login_upper-main-box {
+    padding: var(--space-4) var(--space-6);
+    font-weight: 600;
+    font-size: var(--fs-2xl);
+    letter-spacing: 0.5px;
+}
+
+
+
+.lower-main-box {
+    flex: 1;
+    padding: var(--space-4) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-status-wrapper {
+    padding: var(--space-3) var(--space-4);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.lower-main-box-content {
+    flex: 1;
+    padding: var(--space-4) var(--space-6);
+    width: 90%;
+    font-size: var(--fs-md);
+    justify-content: center;
+}
+
+.upper-main-box,
+.user-status-wrapper {
+    margin: 0; /* entfernt eventuelle Standardabstände */
+}
+
+.upper-main-box + .user-status-wrapper {
+    margin-top: 0; /* entfernt den vertikalen Abstand zwischen den beiden */
+}
+
+.step-navigation-buttons {
+    display: flex;
+    justify-content: flex-end; /* rechtsbündig */
+    gap: 14px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    width: 100%; /* Container nimmt volle Breite ein */
+    box-sizing: border-box; /* damit Padding korrekt berücksichtigt wird */
+}
+
+.step-navigation-buttons .btn {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-600));
+    color: var(--color-inverse);
+    padding: 10px 18px;
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.step-navigation-buttons .btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+}
+
+.step-navigation-buttons .btn:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+/* ======================================
+   Paginierungs-Buttons (Akzent-Stil)
+   ====================================== */
+
+/* Stellt sicher, dass die Paginierungselemente rechtsbündig sind und das Layout der Nav-Buttons haben */
+#partner-pagination .pagination-controls {
+    display: flex;
+    justify-content: flex-end; /* rechtsbündig */
+    gap: 14px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Überschreibt den Hintergrund der Buttons innerhalb des Paginierungs-Containers */
+#partner-pagination .pagination-controls .btn {
+    /* Verwendung von --timeline-dot-active (was auf --color-accent zeigt) für den Hauptteil des Verlaufs */
+    background: linear-gradient(135deg, var(--timeline-dot-active), var(--color-accent-600, #3b82f6));
+    color: var(--color-inverse);
+    /* Alle anderen Stile bleiben wie in .step-navigation-buttons .btn, aber wir müssen sie überschreiben oder duplizieren,
+       da sie spezifischer selektiert werden müssen (z.B. padding, border-radius etc. des Original-Snippets).
+       Idealerweise behältst du nur das 'background' hier, wenn die anderen Stile vererbt werden. */
+}
+
+#partner-pagination .pagination-controls .btn:hover {
+    background: linear-gradient(135deg, var(--color-accent-600, #3b82f6), var(--color-accent-700, #2563eb));
+}
+
+#partner-pagination .pagination-controls .btn:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+/* Stil für deaktivierte Buttons (wichtig für die erste/letzte Seite der Paginierung) */
+#partner-pagination .pagination-controls .btn:disabled {
+    background: var(--timeline-dot-deactivated);
+    color: var(--timeline-label-deactivated);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+    transform: none;
+}
