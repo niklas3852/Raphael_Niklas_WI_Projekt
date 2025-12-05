@@ -44,22 +44,52 @@ export function waitForImages(scope = document) {
 export function initPageLoader({
     message = 'Wir bereiten deine Seite vor...',
     subline = 'Alle Inhalte werden im Hintergrund geladen.',
-    minimumDuration = 600
+    minimumDuration = 600,
+    maxWait = 10000
 } = {}) {
     const overlay = ensureLoaderMarkup(message, subline);
     const startedAt = performance.now();
+    let finished = false;
 
-    async function finish(extraPromises = []) {
-        const tasks = [waitForDocumentReady(), waitForImages(document), ...extraPromises.filter(Boolean)];
-        await Promise.all(tasks);
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function cleanup() {
+        if (finished) return;
+        finished = true;
 
         const remaining = Math.max(0, minimumDuration - (performance.now() - startedAt));
-        if (remaining) await new Promise(resolve => setTimeout(resolve, remaining));
+        if (remaining) await delay(remaining);
 
-        overlay.classList.add('page-loader--fade');
+        overlay?.classList.add('page-loader--fade');
         document.body.classList.remove('loading-active');
-        overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+
+        const removeOverlay = () => overlay?.remove();
+        overlay?.addEventListener('transitionend', removeOverlay, { once: true });
+        // Fallback, falls keine Transition ausgelöst wird
+        setTimeout(removeOverlay, 600);
     }
+
+    async function finish(extraPromises = []) {
+        const tasks = [
+            waitForDocumentReady(),
+            waitForImages(document),
+            ...extraPromises.filter(Boolean)
+        ].map(promise => Promise.resolve(promise).catch(err => {
+            console.error('Fehler während des Ladens erkannt. Führe trotzdem fort.', err);
+            return null;
+        }));
+
+        const guardedTasks = Promise.allSettled(tasks);
+        await Promise.race([
+            guardedTasks,
+            delay(maxWait)
+        ]);
+
+        await cleanup();
+    }
+
+    // Sicherstellen, dass der Loader spätestens nach dem Timeout verschwindet
+    setTimeout(cleanup, Math.max(minimumDuration + 2000, maxWait + 2000));
 
     return { finish };
 }
