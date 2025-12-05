@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="078fa908-c63c-4648-a37a-26c4416aa08d" name="Changes" comment="initial commit">
+    <list default="true" id="078fa908-c63c-4648-a37a-26c4416aa08d" name="Changes" comment="added courses">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Antrag_LA/db/university_data/compatible_courses.js" beforeDir="false" afterPath="$PROJECT_DIR$/Antrag_LA/db/university_data/compatible_courses.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +67,7 @@
       <updated>1764934327905</updated>
       <workItem from="1764934329033" duration="4000" />
       <workItem from="1764934343116" duration="29000" />
-      <workItem from="1764934550772" duration="4983000" />
+      <workItem from="1764934550772" duration="6682000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit">
       <option name="closed" value="true" />
@@ -78,7 +77,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764934734498</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="added courses">
+      <option name="closed" value="true" />
+      <created>1764939781691</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1764939781691</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -86,7 +93,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="initial commit" />
+    <MESSAGE value="added courses" />
+    <option name="LAST_COMMIT_MESSAGE" value="added courses" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
