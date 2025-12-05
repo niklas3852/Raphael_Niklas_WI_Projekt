@@ -4,7 +4,7 @@
 // =======================================================
 
 import { initPageLoader, waitForImages } from "./loading-overlay.js";
-import { loadState } from "./shared-state.js";
+import { createUrlWithState, loadState } from "./shared-state.js";
 
 const pageLoader = initPageLoader({
     message: "Wir erstellen deine Vorschau...",
@@ -155,6 +155,9 @@ const pageLoader = initPageLoader({
         }
 
         const result = buildMapping();
+
+        const backLink = qs(".step4-nav a[href='./step3.html']");
+        if (backLink) backLink.href = createUrlWithState("./step3.html", state);
 
         // ----------------------------------------------------------
         // 6) DOM ELEMENTE
@@ -466,9 +469,8 @@ const pageLoader = initPageLoader({
         // 10) ZURÜCK ZU STEP 3 (ALLE PARAMETER MITNEHMEN)
         // ----------------------------------------------------------
         qs("#back-to-step3")?.addEventListener("click", () => {
-            const currentParams = new URLSearchParams(window.location.search);
             window.laAllowUnload = true;
-            window.location.href = `./step3.html?${currentParams.toString()}`;
+            window.location.href = createUrlWithState("./step3.html");
         });
 
         await pageLoader.finish([
