@@ -43,32 +43,14 @@
             const target = ev.currentTarget || ev.target;
             const href = (target && target.getAttribute && target.getAttribute('href')) || './index.html';
 
-            // determine current step from body[data-step] or from closest .step-navigation-buttons
-            let stepAttr = null;
-            if (document.body && document.body.getAttribute) stepAttr = document.body.getAttribute('data-step');
-            if (!stepAttr) {
-                const nav = target && target.closest && target.closest('.step-navigation-buttons');
-                if (nav && nav.getAttribute) stepAttr = nav.getAttribute('data-step');
-            }
+            const stepAttr = (document.body && document.body.getAttribute && document.body.getAttribute('data-step')) || null;
             const curStep = stepAttr ? String(stepAttr) : null;
             const stepId = curStep ? ('step' + curStep) : null;
 
-            const current = (typeof window.getCurrentUser === 'function') ? window.getCurrentUser() : null;
-            const matrikel = current && current.matrikelnummer ? current.matrikelnummer : null;
-
-            // Confirmation message (only UI confirmation allowed)
-            const msg = 'Wenn du einen Schtitt zurück gehst, gehen alle deine Angaben aus dem aktuellen Schritt verloren. Möchtest du wirklich einen Auswahlschritt zurück?';
+            // Confirmation message (data bleibt erhalten)
+            const msg = 'Du springst einen Schritt zurück. Deine Eingaben bleiben gespeichert. Möchtest du fortfahren?';
             const confirmed = window.confirm(msg);
             if (!confirmed) return;
-
-            // Remove the current step data for the user (if any)
-            if (stepId) {
-                clearUserStepDataForMatric(matrikel, stepId);
-                // special-case: if leaving step2, clear the selected university in memory
-                if (stepId === 'step2') {
-                    try { window._la_selected_university = null; } catch (e) {}
-                }
-            }
 
             // small timeout to allow any UI updates before navigation
             setTimeout(() => { window.location.href = href; }, 80);
@@ -79,10 +61,19 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         try {
-            // select anchor with id=back and elements with .back-btn or button[data-back]
-            const backLinks = Array.from(document.querySelectorAll('a#back, .back-btn, button[data-back]'));
-            backLinks.forEach(link => {
-                // ensure we don't attach duplicate handlers
+            const currentStep = parseInt(document.body?.getAttribute('data-step') || '0', 10) || 0;
+
+            const candidates = Array.from(document.querySelectorAll('a[href]'));
+            candidates.push(...Array.from(document.querySelectorAll('.back-btn, button[data-back]')));
+
+            candidates.forEach(link => {
+                const href = link.getAttribute && link.getAttribute('href');
+                const targetMatch = href && href.match(/step(\d+)\.html/i);
+                const targetStep = targetMatch ? parseInt(targetMatch[1], 10) : null;
+
+                const shouldConfirm = link.matches('a#back, .back-btn, button[data-back]') || (currentStep && targetStep && targetStep < currentStep);
+                if (!shouldConfirm) return;
+
                 link.removeEventListener('click', handleBackClick);
                 link.addEventListener('click', handleBackClick);
             });
