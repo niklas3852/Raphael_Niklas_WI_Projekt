@@ -37,9 +37,19 @@
         }
     }
 
+    function extractStepFromHref(rawHref) {
+        if (!rawHref) return null;
+        try {
+            const absolute = new URL(rawHref, window.location.href);
+            const match = absolute.pathname.match(/step(\d+)\.html/i);
+            return match ? parseInt(match[1], 10) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     function handleBackClick(ev) {
         try {
-            if (ev && ev.preventDefault) ev.preventDefault();
             const target = ev.currentTarget || ev.target;
             const href = (target && target.getAttribute && target.getAttribute('href')) || './index.html';
 
@@ -50,27 +60,30 @@
                 const nav = target && target.closest && target.closest('.step-navigation-buttons');
                 if (nav && nav.getAttribute) stepAttr = nav.getAttribute('data-step');
             }
-            const curStep = stepAttr ? String(stepAttr) : null;
-            const stepId = curStep ? ('step' + curStep) : null;
+            const curStepNumber = stepAttr ? parseInt(stepAttr, 10) : null;
+            const stepId = curStepNumber ? ('step' + curStepNumber) : null;
+
+            // decide whether this navigation is actually backwards
+            const targetStep = extractStepFromHref(href);
+            const isBackwards = targetStep && curStepNumber ? targetStep < curStepNumber : !!(target && target.dataset && target.dataset.back !== undefined);
+            if (!isBackwards) return; // allow normal navigation for forward/neutral steps
+
+            if (ev && ev.preventDefault) ev.preventDefault();
 
             const current = (typeof window.getCurrentUser === 'function') ? window.getCurrentUser() : null;
             const matrikel = current && current.matrikelnummer ? current.matrikelnummer : null;
 
-            // Confirmation message (only UI confirmation allowed)
-            const msg = 'Wenn du einen Schtitt zurück gehst, gehen alle deine Angaben aus dem aktuellen Schritt verloren. Möchtest du wirklich einen Auswahlschritt zurück?';
+            const msg = 'Wenn du einen Schritt zurück gehst, gehen alle deine Angaben aus dem aktuellen Schritt verloren. Möchtest du wirklich zurück?';
             const confirmed = window.confirm(msg);
             if (!confirmed) return;
 
-            // Remove the current step data for the user (if any)
             if (stepId) {
                 clearUserStepDataForMatric(matrikel, stepId);
-                // special-case: if leaving step2, clear the selected university in memory
                 if (stepId === 'step2') {
                     try { window._la_selected_university = null; } catch (e) {}
                 }
             }
 
-            // small timeout to allow any UI updates before navigation
             setTimeout(() => { window.location.href = href; }, 80);
         } catch (e) {
             console.error('back confirm handler error', e);
@@ -80,9 +93,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         try {
             // select anchor with id=back and elements with .back-btn or button[data-back]
-            const backLinks = Array.from(document.querySelectorAll('a#back, .back-btn, button[data-back]'));
-            backLinks.forEach(link => {
-                // ensure we don't attach duplicate handlers
+            const backLinks = Array.from(document.querySelectorAll('.step-navigation-buttons a[href], a#back, .back-btn, button[data-back]'));
+            const uniqueLinks = Array.from(new Set(backLinks));
+            uniqueLinks.forEach(link => {
                 link.removeEventListener('click', handleBackClick);
                 link.addEventListener('click', handleBackClick);
             });

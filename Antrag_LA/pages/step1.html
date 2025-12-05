@@ -72,7 +72,7 @@
 
                 <!-- Matrikel-NR Dropdown -->
                 <div class="field">
-                    <input type="text" name="Matrikel" aria-label="Matrikelnummer" class="corner-input field__input" placeholder="Matrikel-Nr.*" required title="Matrikelnummer eingeben">
+                    <input type="text" name="Matrikel" aria-label="Matrikelnummer" class="corner-input field__input" placeholder="Matrikel-Nr.*" required title="Matrikelnummer eingeben" inputmode="numeric" pattern="\d+" autocomplete="off">
                     <button type="button" class="field__icon" data-tooltip="Deine Matrikelnummer wurde bereits systemseitig vorausgefüllt (kann aber bearbeitet werden)." aria-label="Information: Matrikelnummer">i</button>
                 </div>
 
@@ -142,6 +142,7 @@
 <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js" defer></script>
 <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.3/gsap.min.js" defer></script>
+<script src="../src/state-store.js" defer></script>
 <script src="../src/timeline.js" defer></script>
 <script src="../src/step1.js" defer></script>
 <script type="module" src="../../Corporate_Design/js/ui/include.js"></script>

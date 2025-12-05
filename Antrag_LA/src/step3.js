@@ -25,8 +25,41 @@ import { cities } from "../db/university_data/cities.js";
             university: params.get("university") || "",
             universityId: params.get("universityId") || ""
         };
+        const savedStep1 = window.storageManager?.getStep?.('step1') || {};
+        const savedStep2 = window.storageManager?.getStep?.('step2') || {};
+        const savedStep3 = window.storageManager?.getStep?.('step3') || {};
 
-        let semester = parseInt(user.semester, 10) || 1;
+        const selectedFromParams = (() => {
+            try { return JSON.parse(params.get("selectedCourses") || "[]"); }
+            catch (e) { return []; }
+        })();
+
+        Object.entries({
+            vorname: savedStep1.vorname,
+            nachname: savedStep1.nachname,
+            matrikel: savedStep1.matrikel,
+            kurs: savedStep1.kurs,
+            studiengang: savedStep1.studiengang,
+            semester: savedStep1.semester,
+            vertiefung: savedStep1.vertiefung,
+            zeitraum: savedStep1.zeitraum,
+            studiengangsleitung: savedStep1.studiengangsleitung,
+        }).forEach(([key, value]) => {
+            if (!user[key] && value) user[key] = value;
+        });
+
+        if (!user.university && savedStep2?.selectedUniversity?.name) {
+            user.university = savedStep2.selectedUniversity.name;
+            user.universityId = savedStep2.selectedUniversity.id || user.universityId;
+        }
+
+        let semester = parseInt(user.semester || savedStep3.semester, 10) || 1;
+        user.semester = semester;
+
+        let selectedCourses = new Set([
+            ...(Array.isArray(savedStep3.selectedCourses) ? savedStep3.selectedCourses : []),
+            ...selectedFromParams
+        ]);
 
 
         // ============================================================
@@ -192,16 +225,30 @@ import { cities } from "../db/university_data/cities.js";
 
 
         // ============================================================
-        // 9) SELECTED-COURSES LISTE
+        // 9) SELECTED-COURSES LISTE & PERSISTENZ
         // ============================================================
+        function persistStep3State() {
+            if (!window.storageManager) return;
+            window.storageManager.setStep('step3', {
+                selectedCourses: Array.from(selectedCourses),
+                semester
+            });
+        }
+
+        function buildPartnerCourseMap() {
+            return loadPartnerCourses().reduce((acc, course) => {
+                acc[course.id] = course;
+                return acc;
+            }, {});
+        }
+
         function refreshSelectedCoursesList() {
             const list = qs("#selected-courses-list");
             if (!list) return;
 
             list.innerHTML = "";
-            const selected = qsa(".partner-select").filter(cb => cb.checked);
 
-            if (selected.length === 0) {
+            if (!selectedCourses.size) {
                 const li = document.createElement("li");
                 li.textContent = "Keine Kurse ausgewählt";
                 li.style.opacity = "0.7";
@@ -210,26 +257,26 @@ import { cities } from "../db/university_data/cities.js";
                 return;
             }
 
-            selected.forEach(cb => {
-                const row = cb.closest("tr");
-                const nameCell = row.querySelector("td");
+            const partnerMap = buildPartnerCourseMap();
 
-                const plain = Array.from(nameCell.childNodes)
-                    .filter(n => n.nodeType === 3)
-                    .map(n => n.textContent.trim())
-                    .join(" ");
+            Array.from(selectedCourses).forEach(id => {
+                const course = partnerMap[id];
+                if (!course) return;
 
                 const li = document.createElement("li");
 
                 const span = document.createElement("span");
-                span.textContent = plain;
+                span.textContent = course.name;
 
                 const remove = document.createElement("button");
                 remove.textContent = "✕";
                 remove.className = "remove-course";
                 remove.onclick = () => {
-                    cb.checked = false;
-                    cb.dispatchEvent(new Event("change", { bubbles: true }));
+                    const checkbox = qs(`.partner-select[data-id='${id}']`);
+                    if (checkbox) checkbox.checked = false;
+                    selectedCourses.delete(id);
+                    persistStep3State();
+                    updateECTS();
                 };
 
                 li.appendChild(span);
@@ -244,10 +291,10 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         function updateECTS() {
             const required = parseFloat(ectsRequiredEl.textContent) || 30;
-            const selected = qsa(".partner-select").filter(cb => cb.checked);
+            const partnerMap = buildPartnerCourseMap();
 
-            const sum = selected.reduce(
-                (a, b) => a + parseFloat(b.dataset.ects || 0),
+            const sum = Array.from(selectedCourses).reduce(
+                (total, id) => total + parseFloat(partnerMap[id]?.ects || 0),
                 0
             );
 
@@ -275,13 +322,43 @@ import { cities } from "../db/university_data/cities.js";
             } else {
                 toStep4Btn.classList.add("disabled");
             }
+
+            refreshSelectedCoursesList();
+            persistStep3State();
         }
 
-        const originalUpdateECTS = updateECTS;
-        updateECTS = function () {
-            originalUpdateECTS();
-            refreshSelectedCoursesList();
-        };
+        function handlePartnerToggle(courseId, checked) {
+            if (checked) selectedCourses.add(courseId);
+            else selectedCourses.delete(courseId);
+            updateECTS();
+        }
+
+        function mergeParamsWithState(baseParams = new URLSearchParams()) {
+            const merged = new URLSearchParams(baseParams.toString());
+            const mapping = {
+                vorname: user.vorname,
+                nachname: user.nachname,
+                matrikel: user.matrikel,
+                kurs: user.kurs,
+                studiengang: user.studiengang,
+                semester: semester,
+                vertiefung: user.vertiefung,
+                zeitraum: user.zeitraum,
+                studiengangsleitung: user.studiengangsleitung
+            };
+
+            Object.entries(mapping).forEach(([key, value]) => {
+                if (value) merged.set(key, value);
+            });
+
+            const selectedUni = savedStep2?.selectedUniversity;
+            if (selectedUni) {
+                merged.set('university', selectedUni.name || user.university || '');
+                if (selectedUni.id) merged.set('universityId', selectedUni.id);
+            }
+
+            return merged;
+        }
 
 
         // ============================================================
@@ -336,7 +413,8 @@ import { cities } from "../db/university_data/cities.js";
                 cb.dataset.id = c.id;
                 cb.dataset.ects = c.ects;
                 cb.className = "partner-select";
-                cb.onchange = updateECTS;
+                cb.checked = selectedCourses.has(c.id);
+                cb.addEventListener('change', () => handlePartnerToggle(c.id, cb.checked));
 
                 tr.innerHTML = `
                     <td data-label="Kurs">${c.name}</td>
@@ -390,25 +468,18 @@ import { cities } from "../db/university_data/cities.js";
                 return;
             }
 
-            const selected = qsa(".partner-select")
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.id);
-
-            const newParams = new URLSearchParams(window.location.search);
-            newParams.set("selectedCourses", JSON.stringify(selected));
+            const newParams = mergeParamsWithState(new URLSearchParams(window.location.search));
+            newParams.set("selectedCourses", JSON.stringify(Array.from(selectedCourses)));
 
             window.location.href = "./step4.html?" + newParams.toString();
         });
 
-        document.addEventListener("DOMContentLoaded", () => {
-
-            qs("#back-to-step2")?.addEventListener("click", () => {
-                const params = new URLSearchParams(window.location.search);
-                params.delete("selectedCourses");
-                params.delete("semester");
-                window.location.href = "./step2.html?" + params.toString();
-            });
-        });
+        const backToStep2Link = qs("#back") || qs("#back-to-step2");
+        if (backToStep2Link) {
+            const paramsForBack = mergeParamsWithState(new URLSearchParams(window.location.search));
+            paramsForBack.delete("selectedCourses");
+            backToStep2Link.href = "./step2.html?" + paramsForBack.toString();
+        }
 
 
         // ============================================================
@@ -425,6 +496,7 @@ import { cities } from "../db/university_data/cities.js";
                 partnerPage = 1;
                 renderDHBWTable();
                 renderPartnerTable();
+                persistStep3State();
             }
         });
 

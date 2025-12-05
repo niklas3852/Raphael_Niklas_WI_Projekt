@@ -9,7 +9,33 @@ const paginationEl = document.createElement("div");
 paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
 
-const params = new URLSearchParams(window.location.search);
+function mergeParamsWithStep1(baseParams = new URLSearchParams()) {
+    const merged = new URLSearchParams(baseParams.toString());
+    const savedStep1 = window.storageManager?.getStep?.('step1') || {};
+
+    const mapping = {
+        vorname: 'vorname',
+        nachname: 'nachname',
+        matrikel: 'matrikel',
+        kurs: 'kurs',
+        studiengang: 'studiengang',
+        semester: 'semester',
+        vertiefung: 'vertiefung',
+        studiengangsleitung: 'studiengangsleitung',
+        zeitraum: 'zeitraum'
+    };
+
+    Object.entries(mapping).forEach(([paramKey, stateKey]) => {
+        if (!merged.get(paramKey) && savedStep1[stateKey]) {
+            merged.set(paramKey, savedStep1[stateKey]);
+        }
+    });
+
+    return merged;
+}
+
+const params = mergeParamsWithStep1(new URLSearchParams(window.location.search));
+const savedStep2 = window.storageManager?.getStep?.('step2') || {};
 
 const continentWrapper = document.createElement("div");
 continentWrapper.id = "continent-result-wrapper";
@@ -199,7 +225,16 @@ function renderPaginationControls() {
 
     const pageIndicator = document.createElement("span");
     pageIndicator.className = "page-indicator";
-    pageIndicator.textContent = `${activePage} / ${totalPages}`;
+    pageIndicator.setAttribute('aria-label', `Seite ${activePage} von ${totalPages}`);
+    pageIndicator.innerHTML = `
+        <svg class="page-indicator__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3" y="4" width="8" height="6" rx="1.5"></rect>
+            <rect x="3" y="12" width="8" height="6" rx="1.5"></rect>
+            <rect x="13" y="4" width="8" height="6" rx="1.5"></rect>
+            <rect x="13" y="12" width="8" height="6" rx="1.5"></rect>
+        </svg>
+        <span class="page-indicator__text">${activePage} / ${totalPages}</span>
+    `;
 
     paginationEl.appendChild(prevBtn);
     paginationEl.appendChild(pageIndicator);
@@ -295,6 +330,17 @@ function filterCitiesByContinent(continent) {
     layoutTiles(tiles);
 }
 
+function persistSelectedUniversity(city) {
+    if (!city || !window.storageManager) return;
+    window.storageManager.setStep('step2', {
+        selectedUniversity: {
+            id: city.id,
+            name: city.name,
+            country: city.country
+        }
+    });
+}
+
 searchInput.addEventListener("input", () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => filterCitiesByName(searchInput.value), 150);
@@ -336,6 +382,7 @@ function showCityInfo(city) {
     // Markiere die aktuell ausgewählte Universität global
     try {
         window._la_selected_university = city;
+        persistSelectedUniversity(city);
     } catch (e) {
         // ignore
     }
@@ -474,6 +521,8 @@ function selectUniversity(city) {
     // ----------------------------------------------------
     // UI – Navigation & Button wie bisher
     // ----------------------------------------------------
+    persistSelectedUniversity(city);
+
     const step1Nav = document.querySelector('.step1-nav');
     if (step1Nav) step1Nav.style.display = 'none';
 
@@ -488,7 +537,7 @@ function selectUniversity(city) {
     // ----------------------------------------------------
     // URL-Parameter auslesen
     // ----------------------------------------------------
-    const params = new URLSearchParams(window.location.search);
+    const params = mergeParamsWithStep1(new URLSearchParams(window.location.search));
 
     // ----------------------------------------------------
     // Falls schon vorhanden → überschreiben
@@ -626,8 +675,30 @@ function createCarouselControls() {
         document.getElementById("global-carousel-wrapper").appendChild(controlContainer);
     }
 }
+
+function resolveSavedCity() {
+    const fromParamsId = params.get('universityId');
+    const fromParamsName = params.get('university');
+    const savedSelection = savedStep2?.selectedUniversity;
+
+    return (
+        cities.find(c => !!fromParamsId && c.id === fromParamsId) ||
+        cities.find(c => !!fromParamsName && c.name === fromParamsName) ||
+        cities.find(c => savedSelection?.id && c.id === savedSelection.id) ||
+        cities.find(c => savedSelection?.name && c.name === savedSelection.name) ||
+        null
+    );
+}
+
+function restoreSavedSelection() {
+    const city = resolveSavedCity();
+    if (city) {
+        showCityInfo(city);
+    }
+}
 // ------------------- INIT -------------------
 renderCities();
 renderContinents();
 setupGlobalCarousel();
+restoreSavedSelection();
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));

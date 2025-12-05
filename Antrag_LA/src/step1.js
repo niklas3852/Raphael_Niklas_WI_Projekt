@@ -20,22 +20,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dateRangeInput = document.getElementById("date-range-picker");
 
-
-    // =====================================================
-    //   WICHTIG: ALLE AUTO-FILL / Speicherung entfernen!
-    //   (In Option B wird NICHTS lokal gespeichert)
-    // =====================================================
+    const STEP_KEY = 'step1';
 
 
+    function buildStepPayload() {
+        return {
+            vorname: vorname?.value.trim() || "",
+            nachname: nachname?.value.trim() || "",
+            matrikel: matrikel?.value.trim() || "",
+            kurs: kurs?.value.trim() || "",
+            studiengang: studiengang?.value || "",
+            semester: semester?.value || "",
+            vertiefung: vertiefungSelect?.value || "",
+            studiengangsleitung: studiengangsleitung?.value.trim() || "",
+            zeitraum: dateRangeInput?.value.trim() || ""
+        };
+    }
+
+    function persistStepData() {
+        if (!window.storageManager) return;
+        window.storageManager.setStep(STEP_KEY, buildStepPayload());
+    }
+
+    function restoreFromStateOrParams() {
+        const saved = window.storageManager?.getStep(STEP_KEY) || {};
+        const params = new URLSearchParams(window.location.search);
+
+        const merged = {
+            ...saved,
+            vorname: params.get("vorname") || saved.vorname || "",
+            nachname: params.get("nachname") || saved.nachname || "",
+            matrikel: params.get("matrikel") || saved.matrikel || "",
+            kurs: params.get("kurs") || saved.kurs || "",
+            studiengang: params.get("studiengang") || saved.studiengang || "",
+            semester: params.get("semester") || saved.semester || "",
+            vertiefung: params.get("vertiefung") || saved.vertiefung || "",
+            studiengangsleitung: params.get("studiengangsleitung") || saved.studiengangsleitung || "",
+            zeitraum: params.get("zeitraum") || saved.zeitraum || ""
+        };
+
+        if (vorname) vorname.value = merged.vorname || "";
+        if (nachname) nachname.value = merged.nachname || "";
+        if (matrikel) matrikel.value = merged.matrikel || "";
+        if (kurs) kurs.value = merged.kurs || "";
+        if (studiengang && merged.studiengang) studiengang.value = merged.studiengang;
+        if (semester && merged.semester) semester.value = merged.semester;
+        if (vertiefungSelect && merged.vertiefung) vertiefungSelect.value = merged.vertiefung;
+        if (studiengangsleitung) studiengangsleitung.value = merged.studiengangsleitung || "";
+        if (dateRangeInput) dateRangeInput.value = merged.zeitraum || "";
+
+        return merged;
+    }
 
     // =====================================================
     //   STUDIENGANG → VERTIEFUNG LOGIK
     // =====================================================
 
     function updateVertiefungOptions() {
+        if (!vertiefungSelect) return;
         vertiefungSelect.innerHTML = `<option value="">Bitte wählen...</option>`;
 
-        const sg = studiengang.value;
+        const sg = studiengang?.value;
         if (!sg || !window.dhbwCourses || !window.dhbwCourses[sg]) {
             vertiefungSelect.disabled = true;
             return;
@@ -52,9 +97,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const initialData = restoreFromStateOrParams();
+
     if (studiengang) {
-        studiengang.addEventListener("change", updateVertiefungOptions);
+        studiengang.addEventListener("change", () => {
+            updateVertiefungOptions();
+            persistStepData();
+        });
         updateVertiefungOptions();
+    }
+
+    if (initialData?.vertiefung && vertiefungSelect) {
+        vertiefungSelect.value = initialData.vertiefung;
     }
 
 
@@ -72,9 +126,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 picker.on("selected", (d1, d2) => {
                     if (d1 && d2) {
                         dateRangeInput.value = `${d1.format("DD.MM.YYYY")} - ${d2.format("DD.MM.YYYY")}`;
+                        persistStepData();
                     }
                 });
             }
+        });
+    }
+
+    // Persistierende Eingaben & Nummern-Validation für Matrikelnummer
+    [vorname, nachname, kurs, studiengangsleitung, dateRangeInput].forEach(el => {
+        el?.addEventListener("input", persistStepData);
+    });
+
+    [semester, vertiefungSelect].forEach(el => {
+        el?.addEventListener("change", persistStepData);
+    });
+
+    if (matrikel) {
+        matrikel.addEventListener("input", () => {
+            const digits = matrikel.value.replace(/\D+/g, "");
+            if (digits !== matrikel.value) matrikel.value = digits;
+            persistStepData();
         });
     }
 
@@ -107,6 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nextBtn) {
         nextBtn.addEventListener("click", e => {
             e.preventDefault();
+
+            persistStepData();
 
             if (!form.checkValidity()) {
                 form.reportValidity();
