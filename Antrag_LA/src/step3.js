@@ -5,7 +5,16 @@ import { cities } from "../db/university_data/cities.js";
     function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
     function qsa(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    async function getDhbwDefinitions() {
+        if (window.dhbwCourses) return window.dhbwCourses;
+        if (window.dhbwCoursesPromise) {
+            window.dhbwCourses = await window.dhbwCoursesPromise;
+            return window.dhbwCourses;
+        }
+        return {};
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
 
         // ============================================================
         // 1) URL PARAMETER LADEN
@@ -32,14 +41,11 @@ import { cities } from "../db/university_data/cities.js";
         // ============================================================
         // 2) DATENBANKEN LADEN
         // ============================================================
-        const dhbwDefs = window.dhbwCourses || {};
+        const dhbwDefs = await getDhbwDefinitions();
         const partnerDefs = window.compatibleCourses || {};
 
         const studiengangId = user.studiengang;
-        const studiengangName =
-            dhbwDefs[studiengangId]?.name ||
-            user.studiengang ||
-            "Studiengang unbekannt";
+        const studiengangName = dhbwDefs[studiengangId]?.name || "Studiengang unbekannt";
 
 
         // ============================================================
@@ -109,15 +115,40 @@ import { cities } from "../db/university_data/cities.js";
         // 6) DHBW-Kurse
         // ============================================================
         function loadDHBWCourses() {
-            return dhbwDefs[studiengangId]?.semesters?.[String(semester)] || [];
+            const sg = dhbwDefs[studiengangId];
+            if (!sg) return [];
+
+            const semKey = String(semester);
+            if (user.vertiefung && sg.vertiefungen?.[user.vertiefung]?.semesters?.[semKey]) {
+                return sg.vertiefungen[user.vertiefung].semesters[semKey];
+            }
+
+            return sg.semesters?.[semKey] || [];
         }
 
 
         // ============================================================
         // 7) Partner-Kurse (für Pagination)
         // ============================================================
+        function isPartnerCourseCompatible(course) {
+            const combos = course.compatible || [];
+            if (!combos.length) return true;
+
+            return combos.some(c => {
+                if (c.studiengang !== studiengangId) return false;
+                if (c.vertiefung && user.vertiefung) {
+                    return c.vertiefung === user.vertiefung;
+                }
+                return true;
+            });
+        }
+
         function loadPartnerCourses() {
-            return partner?.semesters?.[String(semester)] || [];
+            const all = partner?.courses || [];
+            return all.filter(c => {
+                const semesterMatches = !c.semester || String(c.semester) === String(semester);
+                return semesterMatches && isPartnerCourseCompatible(c);
+            });
         }
 
         let partnerPage = 1;

@@ -3,11 +3,21 @@
 // Behält 100% das Layout der alten Version bei!
 // =======================================================
 
+
 (function () {
 
     function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    async function getDhbwDefinitions() {
+        if (window.dhbwCourses) return window.dhbwCourses;
+        if (window.dhbwCoursesPromise) {
+            window.dhbwCourses = await window.dhbwCoursesPromise;
+            return window.dhbwCourses;
+        }
+        return {};
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
 
         // ----------------------------------------------------------
         // 1) URL PARAMETER LADEN
@@ -34,7 +44,7 @@
         // ----------------------------------------------------------
         // 2) DATENBANKEN LADEN
         // ----------------------------------------------------------
-        const dhbwDefs = window.dhbwCourses || {};
+        const dhbwDefs = await getDhbwDefinitions();
         const partnerDefs = window.compatibleCourses || {};
 
         // ----------------------------------------------------------
@@ -52,14 +62,39 @@
 
         if (!partnerKey) partnerKey = Object.keys(partnerDefs)[0];
 
-        const partner = partnerDefs[partnerKey];
-        const partnerCourses = partner.semesters?.[semester] || [];
+        const partner = partnerDefs[partnerKey] || { name: user.university };
+        function partnerCourseMatches(course) {
+            const combos = course.compatible || [];
+            if (!combos.length) return true;
+
+            return combos.some(c => {
+                if (c.studiengang !== user.studiengang) return false;
+                if (c.vertiefung && user.vertiefung) {
+                    return c.vertiefung === user.vertiefung;
+                }
+                return true;
+            });
+        }
+
+        const partnerCourses = (partner.courses || []).filter(c => {
+            const semesterMatches = !c.semester || String(c.semester) === semester;
+            return semesterMatches && partnerCourseMatches(c);
+        });
 
         // ----------------------------------------------------------
         // 4) DHBW MODULE LADEN
         // ----------------------------------------------------------
-        const dhbwModules =
-            dhbwDefs[user.studiengang]?.semesters?.[semester] || [];
+        const dhbwModules = (() => {
+            const sg = dhbwDefs[user.studiengang];
+            if (!sg) return [];
+
+            const semKey = String(semester);
+            if (user.vertiefung && sg.vertiefungen?.[user.vertiefung]?.semesters?.[semKey]) {
+                return sg.vertiefungen[user.vertiefung].semesters[semKey];
+            }
+
+            return sg.semesters?.[semKey] || [];
+        })();
 
         // ----------------------------------------------------------
         // 5) PARTNER-MAPPING ERSTELLEN
