@@ -5,14 +5,12 @@ function ensureLoaderMarkup(message, subline) {
     const overlay = document.createElement('div');
     overlay.className = 'page-loader';
     overlay.innerHTML = `
-        <div class="loader-card">
-            <div class="loader-spinner">
-                <span class="spinner-dot"></span>
-                <span class="spinner-dot"></span>
-                <span class="spinner-dot"></span>
+        <div class="loader-overlay">
+            <div class="loader-circle" aria-hidden="true"></div>
+            <div class="loader-info">
+                <div class="loader-text">${message}</div>
+                <p class="loader-subtext">${subline}</p>
             </div>
-            <div class="loader-text">${message}</div>
-            <p class="loader-subtext">${subline}</p>
         </div>
     `;
 
