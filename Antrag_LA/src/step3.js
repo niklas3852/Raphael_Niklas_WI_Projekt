@@ -1,5 +1,6 @@
 import { cities } from "../db/university_data/cities.js";
 import { initPageLoader, waitForImages } from "./loading-overlay.js";
+import { loadState, updateState } from "./shared-state.js";
 
 const pageLoader = initPageLoader({
     message: "Wir laden alle Module und Kursdaten...",
@@ -23,25 +24,27 @@ const pageLoader = initPageLoader({
     document.addEventListener("DOMContentLoaded", async () => {
 
         // ============================================================
-        // 1) URL PARAMETER LADEN
+        // 1) STATUS AUS window.name LADEN
         // ============================================================
-        let params = new URLSearchParams(window.location.search);
+        const state = loadState();
+        const step1Data = state.step1Data || {};
+        const step3State = state.step3 || {};
 
         let user = {
-            vorname: params.get("vorname") || "",
-            nachname: params.get("nachname") || "",
-            matrikel: params.get("matrikel") || "",
-            kurs: params.get("kurs") || "",
-            studiengang: params.get("studiengang") || "",
-            semester: params.get("semester") || "1",
-            vertiefung: params.get("vertiefung") || "",
-            zeitraum: params.get("zeitraum") || "",
-            studiengangsleitung: params.get("studiengangsleitung") || "",
-            university: params.get("university") || "",
-            universityId: params.get("universityId") || ""
+            vorname: step1Data.vorname || "",
+            nachname: step1Data.nachname || "",
+            matrikel: step1Data.matrikel || "",
+            kurs: step1Data.kurs || "",
+            studiengang: step1Data.studiengang || "",
+            semester: step1Data.semester || "1",
+            vertiefung: step1Data.vertiefung || "",
+            zeitraum: step1Data.zeitraum || "",
+            studiengangsleitung: step1Data.studiengangsleitung || "",
+            university: state.selectedUniversity?.name || "",
+            universityId: state.selectedUniversity?.id || ""
         };
 
-        let semester = parseInt(user.semester, 10) || 1;
+        let semester = parseInt(step3State.semester || user.semester, 10) || 1;
 
 
         // ============================================================
@@ -99,21 +102,14 @@ const pageLoader = initPageLoader({
         const paginationContainer = qs("#partner-pagination");
 
         function persistStep3State() {
-            const statePayload = {
-                semester,
-                partnerPage,
-                selectedCourses: Array.from(selectedCourseIds)
-            };
-
-            const paramsForUrl = new URLSearchParams(params);
-            paramsForUrl.set('semester', String(semester));
-            paramsForUrl.set('partnerPage', String(partnerPage));
-            paramsForUrl.set('selectedCourses', JSON.stringify(Array.from(selectedCourseIds)));
-
-            params = paramsForUrl;
-
-            const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
-            window.history.replaceState({}, '', newUrl);
+            updateState(prev => ({
+                ...prev,
+                step3: {
+                    semester,
+                    partnerPage,
+                    selectedCourses: Array.from(selectedCourseIds)
+                }
+            }));
         }
 
 
@@ -175,15 +171,13 @@ const pageLoader = initPageLoader({
             });
         }
 
-        let partnerPage = parseInt(params.get("partnerPage") || storedStep3.partnerPage || "1", 10) || 1;
+        let partnerPage = parseInt(step3State.partnerPage || "1", 10) || 1;
         const PARTNER_PAGE_SIZE = 8;
         let selectedCourseIds = new Set();
         let cachedPartnerCourses = [];
-        const selectedFromParams = params.get("selectedCourses") || JSON.stringify(storedStep3.selectedCourses || []);
-        if (selectedFromParams) {
-            try {
-                selectedCourseIds = new Set(JSON.parse(selectedFromParams).map(String));
-            } catch (e) { selectedCourseIds = new Set(); }
+        const selectedFromState = step3State.selectedCourses || [];
+        if (selectedFromState.length) {
+            selectedCourseIds = new Set(selectedFromState.map(String));
         }
 
 
@@ -472,26 +466,13 @@ const pageLoader = initPageLoader({
             }
 
             const selected = Array.from(selectedCourseIds);
-            const stepState = { semester, partnerPage, selectedCourses: selected };
-
-            const newParams = new URLSearchParams(params);
-            newParams.set("selectedCourses", JSON.stringify(selected));
-            newParams.set("semester", String(semester));
-            newParams.set("partnerPage", String(partnerPage));
+            updateState(prev => ({
+                ...prev,
+                step3: { semester, partnerPage, selectedCourses: selected }
+            }));
 
             window.laAllowUnload = true;
-            window.location.href = "./step4.html?" + newParams.toString();
-        });
-
-        document.addEventListener("DOMContentLoaded", () => {
-
-            qs("#back-to-step2")?.addEventListener("click", () => {
-                const params = new URLSearchParams(window.location.search);
-                params.delete("selectedCourses");
-                params.delete("semester");
-                window.laAllowUnload = true;
-                window.location.href = "./step2.html?" + params.toString();
-            });
+            window.location.href = "./step4.html";
         });
 
 

@@ -1,6 +1,7 @@
 import { cities } from '../db/university_data/cities.js';
 import { continents } from '../db/university_data/continents.js';
 import { initPageLoader, waitForImages } from './loading-overlay.js';
+import { loadState, updateState } from './shared-state.js';
 
 const pageLoader = initPageLoader({
     message: 'Wir laden alle Gasthochschulen...',
@@ -23,7 +24,8 @@ const paginationEl = document.createElement("div");
 paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
 
-const params = new URLSearchParams(window.location.search);
+const appState = loadState();
+let selectedUniversity = appState.selectedUniversity || null;
 
 const continentWrapper = document.createElement("div");
 continentWrapper.id = "continent-result-wrapper";
@@ -61,16 +63,6 @@ let activeContinent = null;
 const ROWS_PER_PAGE = 2;
 
 const backLink = document.querySelector('.step1-nav #back');
-if (backLink) {
-    const backParams = params.toString();
-    const target = backParams ? `./step1.html?${backParams}` : './step1.html';
-    backLink.setAttribute('href', target);
-}
-
-function appendUserParams(targetParams) {
-    const keys = ['vorname', 'nachname', 'matrikel', 'kurs', 'studiengang', 'semester', 'vertiefung', 'studiengangsleitung', 'zeitraum'];
-    keys.forEach(key => targetParams.set(key, params.get(key) || ''));
-}
 
 let activePage = 1;
 let totalPages = 1;
@@ -356,6 +348,37 @@ function renderContinents() {
     });
 }
 
+function exitCityDetail() {
+    const globeLayout = document.querySelector('.globe-city-layout');
+    globeLayout?.classList.remove("active");
+
+    if (welcomeContainer) {
+        welcomeContainer.style.display = "none";
+        const galleryEl = document.getElementById("gallery");
+        if (galleryEl) galleryEl.innerHTML = "";
+    }
+
+    const infoEl = document.getElementById("city-info");
+    if (infoEl) {
+        infoEl.style.display = "none";
+        infoEl.innerHTML = "";
+    }
+
+    cityListEl.style.display = "grid";
+    paginationEl.style.display = "flex";
+    searchInput.style.display = "block";
+    continentContainer.style.display = "flex";
+
+    selectedUniversity = null;
+    updateState(prev => ({ ...prev, selectedUniversity: null }));
+
+    const step1Nav = document.querySelector('.step1-nav');
+    if (step1Nav) step1Nav.style.display = 'flex';
+
+    const step2Nav = document.querySelector('.step2-nav');
+    if (step2Nav) step2Nav.style.display = 'none';
+}
+
 function showCityInfo(city) {
     document.body.classList.add("showing-city-info");
 
@@ -484,12 +507,9 @@ function showCityInfo(city) {
 
     setupAccordion();
 
-    // 🔹 Back-Button: Seite komplett neu laden
+    // 🔹 Back-Button: zurück zur Auswahl
     const backBtn = infoEl.querySelector(".back-btn");
-    backBtn.addEventListener("click", () => {
-        window.laAllowUnload = true;
-        location.reload();
-    });
+    backBtn.addEventListener("click", exitCityDetail);
 
     infoEl.style.display = "flex";
     infoEl.style.flexDirection = "column";
@@ -510,31 +530,18 @@ function selectUniversity(city) {
     const continueBtn = document.getElementById('continue-with-university');
     if (continueBtn) {
         continueBtn.textContent = `Fortfahren mit der ${city.name}`;
-    }
-
-    // ----------------------------------------------------
-    // URL-Parameter auslesen
-    // ----------------------------------------------------
-    const params = new URLSearchParams(window.location.search);
-    appendUserParams(params);
-
-    // ----------------------------------------------------
-    // Falls schon vorhanden → überschreiben
-    // Falls nicht vorhanden → hinzufügen
-    // (set() funktioniert in beiden Fällen korrekt)
-    // ----------------------------------------------------
-    params.set("university", city.name);
-    params.set("universityId", city.id);
-
-    // ----------------------------------------------------
-    // Button → Weiterleitung mit ALLEN Parametern
-    // ----------------------------------------------------
-    if (continueBtn) {
         continueBtn.onclick = () => {
+            updateState(prev => ({
+                ...prev,
+                selectedUniversity: city
+            }));
             window.laAllowUnload = true;
-            window.location.href = "./step3.html?" + params.toString();
+            window.location.href = "./step3.html";
         };
     }
+
+    selectedUniversity = city;
+    updateState(prev => ({ ...prev, selectedUniversity: city }));
 }
 
 // ------------------- Temperatur -------------------
@@ -656,17 +663,15 @@ function createCarouselControls() {
     }
 }
 
-function restoreSelectionFromParams() {
-    const savedId = params.get('universityId');
-    const savedName = params.get('university');
-    if (!savedId && !savedName) return;
-    const match = cities.find(c => (savedId && c.id === savedId) || c.name === savedName);
+function restoreSelectionFromState() {
+    if (!selectedUniversity) return;
+    const match = cities.find(c => c.id === selectedUniversity.id || c.name === selectedUniversity.name);
     if (match) showCityInfo(match);
 }
 // ------------------- INIT -------------------
 renderCities();
 renderContinents();
 setupGlobalCarousel();
-restoreSelectionFromParams();
+restoreSelectionFromState();
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));

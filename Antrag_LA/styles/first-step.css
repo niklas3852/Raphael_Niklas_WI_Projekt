@@ -77,8 +77,8 @@
 /* Formular-Container */
 .formular-box-container {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* zwei Spalten */
-    grid-template-rows: repeat(3, auto); /* drei Reihen */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-auto-flow: row dense;
     gap: var(--form-gap);
     max-width: var(--form-max-width);
     width: 100%;
@@ -170,6 +170,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.field-error,
+.pflicht-hinweis {
+    grid-column: 1 / -1;
+    margin: 0.25rem 0 0;
 }
 
 /* Begrenze die Breite des zentrierten Inputs, damit es optisch mittig und nicht überbreit wirkt */

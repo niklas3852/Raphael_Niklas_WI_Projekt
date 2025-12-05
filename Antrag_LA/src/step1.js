@@ -1,8 +1,6 @@
-document.addEventListener("DOMContentLoaded", () => {
+import { loadState, updateState } from "./shared-state.js";
 
-    // =====================================================
-    //   ELEMENTE
-    // =====================================================
+document.addEventListener("DOMContentLoaded", () => {
 
     const form = document.getElementById("step1-form");
     const nextBtn = document.getElementById("next");
@@ -16,30 +14,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const studiengangsleitung = document.querySelector("[name='Studiengangsleitung']");
 
     const vertiefungSelect = document.getElementById("vertiefung-select");
-    const vertiefungField = document.getElementById("vertiefung-field");
-
     const dateRangeInput = document.getElementById("date-range-picker");
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramData = {
-        vorname: urlParams.get('vorname') || '',
-        nachname: urlParams.get('nachname') || '',
-        matrikel: urlParams.get('matrikel') || '',
-        kurs: urlParams.get('kurs') || '',
-        studiengang: urlParams.get('studiengang') || '',
-        semester: urlParams.get('semester') || '',
-        vertiefung: urlParams.get('vertiefung') || '',
-        studiengangsleitung: urlParams.get('studiengangsleitung') || '',
-        zeitraum: urlParams.get('zeitraum') || ''
-    };
-    const initialData = { ...paramData };
 
     const matrikelError = document.getElementById("matrikel-error");
 
-    /**
-     * Erzwingt eine reine Zifferneingabe für die Matrikelnummer und kommuniziert Fehler barrierefrei.
-     * Gleichzeitig wird der aktuelle Wert sofort in den Storage geschrieben, damit ein Reload keine Daten verliert.
-     */
+    const storedState = loadState();
+    const initialData = storedState.step1Data || {};
+
+    function collectFormData() {
+        return {
+            vorname: vorname?.value.trim() || "",
+            nachname: nachname?.value.trim() || "",
+            matrikel: matrikel?.value.trim() || "",
+            kurs: kurs?.value.trim() || "",
+            studiengang: studiengang?.value || "",
+            semester: semester?.value || "",
+            vertiefung: vertiefungSelect?.value || "",
+            studiengangsleitung: studiengangsleitung?.value.trim() || "",
+            zeitraum: dateRangeInput?.value.trim() || ""
+        };
+    }
+
+    function hydrateFormFromData(data) {
+        if (!data) return;
+        if (vorname && data.vorname) vorname.value = data.vorname;
+        if (nachname && data.nachname) nachname.value = data.nachname;
+        if (matrikel && data.matrikel) matrikel.value = data.matrikel;
+        if (kurs && data.kurs) kurs.value = data.kurs;
+        if (semester && data.semester) semester.value = data.semester;
+        if (studiengangsleitung && data.studiengangsleitung) studiengangsleitung.value = data.studiengangsleitung;
+        if (dateRangeInput && data.zeitraum) dateRangeInput.value = data.zeitraum;
+    }
+
     function setupMatrikelInput() {
         if (!matrikel) return;
 
@@ -79,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
         matrikel.addEventListener("input", () => {
             sanitize();
             validateMatrikel();
-            persistFormData();
         });
 
         matrikel.addEventListener("blur", validateMatrikel);
@@ -87,45 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sanitize();
         validateMatrikel();
     }
-
-    function collectFormData() {
-        return {
-            vorname: vorname?.value.trim() || "",
-            nachname: nachname?.value.trim() || "",
-            matrikel: matrikel?.value.trim() || "",
-            kurs: kurs?.value.trim() || "",
-            studiengang: studiengang?.value || "",
-            semester: semester?.value || "",
-            vertiefung: vertiefungSelect?.value || "",
-            studiengangsleitung: studiengangsleitung?.value.trim() || "",
-            zeitraum: dateRangeInput?.value.trim() || ""
-        };
-    }
-
-    function persistFormData() {
-        const payload = collectFormData();
-
-        const params = new URLSearchParams(window.location.search);
-        Object.entries(payload).forEach(([key, value]) => params.set(key, value || ""));
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.replaceState({}, "", newUrl);
-    }
-
-    function hydrateFormFromData(data) {
-        if (!data) return;
-        if (vorname && data.vorname) vorname.value = data.vorname;
-        if (nachname && data.nachname) nachname.value = data.nachname;
-        if (matrikel && data.matrikel) matrikel.value = data.matrikel;
-        if (kurs && data.kurs) kurs.value = data.kurs;
-        if (semester && data.semester) semester.value = data.semester;
-        if (studiengangsleitung && data.studiengangsleitung) studiengangsleitung.value = data.studiengangsleitung;
-        if (dateRangeInput && data.zeitraum) dateRangeInput.value = data.zeitraum;
-    }
-
-
-    // =====================================================
-    //   STUDIENGANG → VERTIEFUNG LOGIK
-    // =====================================================
 
     async function getDhbwDefinitions() {
         if (window.dhbwCourses) return window.dhbwCourses;
@@ -180,12 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
     hydrateFormFromData(initialData);
-
-    // =====================================================
-    //   DATUMS-PICKER
-    // =====================================================
 
     if (dateRangeInput && window.Litepicker) {
         new Litepicker({
@@ -197,37 +158,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 picker.on("selected", (d1, d2) => {
                     if (d1 && d2) {
                         dateRangeInput.value = `${d1.format("DD.MM.YYYY")} - ${d2.format("DD.MM.YYYY")}`;
-                        persistFormData();
                     }
                 });
             }
         });
     }
 
-    [vorname, nachname, kurs, studiengangsleitung, dateRangeInput].forEach(el => {
-        el?.addEventListener("input", persistFormData);
-    });
     setupMatrikelInput();
-    [studiengang, semester, vertiefungSelect].forEach(el => {
-        el?.addEventListener("change", persistFormData);
-    });
-
-
-    // =====================================================
-    //   URL PARAMETER ERSTELLEN (Routing via GET)
-    // =====================================================
-
-    function buildUrlParams() {
-        const data = collectFormData();
-        const params = new URLSearchParams(window.location.search);
-        Object.entries(data).forEach(([key, value]) => params.set(key, value || ""));
-        return params.toString();
-    }
-
-
-    // =====================================================
-    //   WEITER → VALIDIEREN & URL-NAVIGATION
-    // =====================================================
 
     if (nextBtn) {
         nextBtn.addEventListener("click", e => {
@@ -238,13 +175,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            persistFormData();
-
-            const baseHref = nextBtn.getAttribute("href") || "./step2.html";
-            const finalUrl = `${baseHref}?${buildUrlParams()}`;
+            const data = collectFormData();
+            updateState(prev => ({
+                ...prev,
+                step1Data: data
+            }));
 
             window.laAllowUnload = true;
-            window.location.href = finalUrl;
+            window.location.href = "./step2.html";
         });
     }
 });
