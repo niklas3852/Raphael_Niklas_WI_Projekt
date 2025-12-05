@@ -499,6 +499,13 @@ input[type="date"].corner-input:focus-visible,
     color: var(--color-text, #111827);
 }
 
+.field-error {
+    margin: 0.35rem 0 0;
+    color: #b91c1c;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
 /* Responsive: kleiner Kalender auf sehr kleinen Bildschirmen */
 @media (max-width: 420px) {
     .flatpickr-calendar,

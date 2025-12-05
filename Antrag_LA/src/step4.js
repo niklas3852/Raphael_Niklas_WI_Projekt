@@ -27,27 +27,32 @@ const pageLoader = initPageLoader({
     document.addEventListener("DOMContentLoaded", async () => {
 
         // ----------------------------------------------------------
-        // 1) URL PARAMETER LADEN
+        // 1) URL PARAMETER + STORAGE LADEN
         // ----------------------------------------------------------
         const params = new URLSearchParams(window.location.search);
+        const storage = window.laStorage;
+        const storedStep1 = storage?.getSection?.('step1') || {};
+        const storedStep2 = storage?.getSection?.('step2') || {};
+        const storedStep3 = storage?.getSection?.('step3') || {};
 
         let user = {
-            vorname: params.get("vorname") || "",
-            nachname: params.get("nachname") || "",
-            matrikel: params.get("matrikel") || "",
-            kurs: params.get("kurs") || "",
-            studiengang: params.get("studiengang") || "",
-            semester: params.get("semester") || "1",
-            vertiefung: params.get("vertiefung") || "",
-            zeitraum: params.get("zeitraum") || "",
-            studiengangsleitung: params.get("studiengangsleitung") || "",
-            university: params.get("university") || "",
-            universityId: params.get("universityId") || "",
+            vorname: params.get("vorname") || storedStep1.vorname || "",
+            nachname: params.get("nachname") || storedStep1.nachname || "",
+            matrikel: params.get("matrikel") || storedStep1.matrikel || "",
+            kurs: params.get("kurs") || storedStep1.kurs || "",
+            studiengang: params.get("studiengang") || storedStep1.studiengang || "",
+            semester: params.get("semester") || storedStep1.semester || storedStep3.semester || "1",
+            vertiefung: params.get("vertiefung") || storedStep1.vertiefung || "",
+            zeitraum: params.get("zeitraum") || storedStep1.zeitraum || "",
+            studiengangsleitung: params.get("studiengangsleitung") || storedStep1.studiengangsleitung || "",
+            university: params.get("university") || storedStep2.university || "",
+            universityId: params.get("universityId") || storedStep2.universityId || "",
             selectedCourses: []
         };
 
         try {
-            user.selectedCourses = JSON.parse(params.get("selectedCourses") || "[]");
+            const storedCourses = storedStep3.selectedCourses || [];
+            user.selectedCourses = JSON.parse(params.get("selectedCourses") || JSON.stringify(storedCourses));
         } catch (e) { user.selectedCourses = []; }
 
         const semester = String(user.semester);
@@ -373,22 +378,26 @@ const pageLoader = initPageLoader({
         // ----------------------------------------------------------
         // E-Mail Teilen
         // ----------------------------------------------------------
-        qs("#share-pdf")?.addEventListener("click", () => {
-            const subject = `Learning Agreement – ${user.vorname} ${user.nachname}`.trim();
-            const body = [
-                "Hallo,",
-                "",
-                "hier sind die wichtigsten Angaben zu meinem Learning Agreement:",
-                `Gastuniversität: ${partner.name}`,
-                `Zeitraum: ${user.zeitraum || 'nicht angegeben'}`,
-                `Studiengang: ${user.studiengang || '—'} (Semester ${user.semester})`,
-                "",
-                "PDF-Vorschau findest du hier:",
-                window.location.href
-            ].join("\n");
+        const shareButton = qs("#share-pdf");
+        if (shareButton) {
+            shareButton.setAttribute("type", "button");
+            shareButton.addEventListener("click", () => {
+                const subject = `Learning Agreement – ${user.vorname} ${user.nachname}`.trim();
+                const body = [
+                    "Hallo,",
+                    "",
+                    "hier sind die wichtigsten Angaben zu meinem Learning Agreement:",
+                    `Gastuniversität: ${partner.name}`,
+                    `Zeitraum: ${user.zeitraum || 'nicht angegeben'}`,
+                    `Studiengang: ${user.studiengang || '—'} (Semester ${user.semester})`,
+                    "",
+                    "PDF-Vorschau findest du hier:",
+                    window.location.href
+                ].join("\n");
 
-            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        });
+                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            });
+        }
 
         // ----------------------------------------------------------
         // Absenden (an Webhook.site)

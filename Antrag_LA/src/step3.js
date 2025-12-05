@@ -23,22 +23,26 @@ const pageLoader = initPageLoader({
     document.addEventListener("DOMContentLoaded", async () => {
 
         // ============================================================
-        // 1) URL PARAMETER LADEN
+        // 1) URL PARAMETER + STORAGE LADEN
         // ============================================================
         const params = new URLSearchParams(window.location.search);
+        const storage = window.laStorage;
+        const storedStep1 = storage?.getSection?.('step1') || {};
+        const storedStep2 = storage?.getSection?.('step2') || {};
+        const storedStep3 = storage?.getSection?.('step3') || {};
 
         let user = {
-            vorname: params.get("vorname") || "",
-            nachname: params.get("nachname") || "",
-            matrikel: params.get("matrikel") || "",
-            kurs: params.get("kurs") || "",
-            studiengang: params.get("studiengang") || "",
-            semester: params.get("semester") || "1",
-            vertiefung: params.get("vertiefung") || "",
-            zeitraum: params.get("zeitraum") || "",
-            studiengangsleitung: params.get("studiengangsleitung") || "",
-            university: params.get("university") || "",
-            universityId: params.get("universityId") || ""
+            vorname: params.get("vorname") || storedStep1.vorname || "",
+            nachname: params.get("nachname") || storedStep1.nachname || "",
+            matrikel: params.get("matrikel") || storedStep1.matrikel || "",
+            kurs: params.get("kurs") || storedStep1.kurs || "",
+            studiengang: params.get("studiengang") || storedStep1.studiengang || "",
+            semester: params.get("semester") || storedStep1.semester || storedStep3.semester || "1",
+            vertiefung: params.get("vertiefung") || storedStep1.vertiefung || "",
+            zeitraum: params.get("zeitraum") || storedStep1.zeitraum || "",
+            studiengangsleitung: params.get("studiengangsleitung") || storedStep1.studiengangsleitung || "",
+            university: params.get("university") || storedStep2.university || "",
+            universityId: params.get("universityId") || storedStep2.universityId || ""
         };
 
         let semester = parseInt(user.semester, 10) || 1;
@@ -99,13 +103,32 @@ const pageLoader = initPageLoader({
         const paginationContainer = qs("#partner-pagination");
 
         function persistStep3State() {
-            const updatedParams = new URLSearchParams(window.location.search);
-            updatedParams.set('semester', String(semester));
-            updatedParams.set('partnerPage', String(partnerPage));
-            updatedParams.set('selectedCourses', JSON.stringify(Array.from(selectedCourseIds)));
+            const statePayload = {
+                semester,
+                partnerPage,
+                selectedCourses: Array.from(selectedCourseIds)
+            };
 
-            const newUrl = `${window.location.pathname}?${updatedParams.toString()}`;
-            window.history.replaceState({}, '', newUrl);
+            if (storage?.saveSection) {
+                storage.saveSection('step3', statePayload);
+            }
+
+            const paramsForUrl = storage?.buildParams
+                ? storage.buildParams({ step3: statePayload })
+                : new URLSearchParams(window.location.search);
+
+            if (!storage?.buildParams) {
+                paramsForUrl.set('semester', String(semester));
+                paramsForUrl.set('partnerPage', String(partnerPage));
+                paramsForUrl.set('selectedCourses', JSON.stringify(Array.from(selectedCourseIds)));
+            }
+
+            if (storage?.syncUrl) {
+                storage.syncUrl(paramsForUrl);
+            } else {
+                const newUrl = `${window.location.pathname}?${paramsForUrl.toString()}`;
+                window.history.replaceState({}, '', newUrl);
+            }
         }
 
 
@@ -167,15 +190,15 @@ const pageLoader = initPageLoader({
             });
         }
 
-        let partnerPage = parseInt(params.get("partnerPage") || "1", 10) || 1;
+        let partnerPage = parseInt(params.get("partnerPage") || storedStep3.partnerPage || "1", 10) || 1;
         const PARTNER_PAGE_SIZE = 8;
         let selectedCourseIds = new Set();
         let cachedPartnerCourses = [];
-        const selectedFromParams = params.get("selectedCourses");
+        const selectedFromParams = params.get("selectedCourses") || JSON.stringify(storedStep3.selectedCourses || []);
         if (selectedFromParams) {
             try {
                 selectedCourseIds = new Set(JSON.parse(selectedFromParams).map(String));
-            } catch (e) { /* ignore */ }
+            } catch (e) { selectedCourseIds = new Set(); }
         }
 
 
@@ -354,25 +377,28 @@ const pageLoader = initPageLoader({
             const prev = document.createElement("button");
             prev.setAttribute("aria-label", "Vorherige Seite");
             prev.className = "pagination-btn icon-only";
-            prev.innerHTML = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+            prev.innerHTML = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Vorherige Seite</title><polyline points="15 18 9 12 15 6"></polyline></svg>`;
             prev.disabled = partnerPage === 1;
             prev.onclick = () => {
                 partnerPage--;
+                persistStep3State();
                 renderPartnerTable();
             };
 
             const next = document.createElement("button");
             next.setAttribute("aria-label", "Nächste Seite");
             next.className = "pagination-btn icon-only";
-            next.innerHTML = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+            next.innerHTML = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Nächste Seite</title><polyline points="9 18 15 12 9 6"></polyline></svg>`;
             next.disabled = partnerPage === totalPages;
             next.onclick = () => {
                 partnerPage++;
+                persistStep3State();
                 renderPartnerTable();
             };
 
             const info = document.createElement("span");
-            info.textContent = `Seite ${partnerPage} / ${totalPages}`;
+            const pageIcon = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><title>Seitenauswahl</title><rect x="3" y="4" width="18" height="4" rx="1"></rect><rect x="3" y="10" width="18" height="4" rx="1"></rect><rect x="3" y="16" width="18" height="4" rx="1"></rect></svg>';
+            info.innerHTML = `${pageIcon}<span class="page-indicator-text" aria-live="polite">Seite ${partnerPage} / ${totalPages}</span>`;
 
             paginationContainer.appendChild(prev);
             paginationContainer.appendChild(info);
@@ -461,11 +487,15 @@ const pageLoader = initPageLoader({
             }
 
             const selected = Array.from(selectedCourseIds);
+            const stepState = { semester, partnerPage, selectedCourses: selected };
+            if (storage?.saveSection) storage.saveSection('step3', stepState);
 
-            const newParams = new URLSearchParams(window.location.search);
-            newParams.set("selectedCourses", JSON.stringify(selected));
+            const newParams = storage?.buildParams
+                ? storage.buildParams({ step3: stepState })
+                : new URLSearchParams(window.location.search);
+            if (!storage?.buildParams) newParams.set("selectedCourses", JSON.stringify(selected));
 
-            persistStep3State();
+            if (storage?.syncUrl) storage.syncUrl(newParams);
             window.location.href = "./step4.html?" + newParams.toString();
         });
 
@@ -486,6 +516,7 @@ const pageLoader = initPageLoader({
         renderDHBWTable();
         renderPartnerTable();
         showWelcome(findCity());
+        persistStep3State();
 
         document.addEventListener("keydown", e => {
             if (e.key >= "1" && e.key <= "6") {
