@@ -3,23 +3,11 @@ import { continents } from '../db/university_data/continents.js';
 import { initPageLoader, waitForImages } from './loading-overlay.js';
 import { loadState, updateState } from './shared-state.js';
 
-const pageLoader = initPageLoader({
-    message: 'Wir laden alle Gasthochschulen...',
-    subline: 'Karten, Bilder und Daten werden im Hintergrund vorbereitet.'
-});
-
-const finalizeLoader = () => pageLoader.finish([waitForImages(document)]);
-
-if (document.readyState === "complete") {
-    finalizeLoader();
-} else {
-    window.addEventListener("load", finalizeLoader, { once: true });
-}
-
 const welcomeTextEl = document.getElementById("welcome-text");
 const welcomeContainer = document.getElementById("welcome-city-container");
 const cityListEl = document.getElementById("city-list");
 const searchInput = document.getElementById("city-search");
+const globeContainer = document.getElementById("globe-container");
 const paginationEl = document.createElement("div");
 paginationEl.className = "pagination";
 cityListEl.insertAdjacentElement("afterend", paginationEl);
@@ -66,6 +54,23 @@ const backLink = document.querySelector('.step1-nav #back');
 
 let activePage = 1;
 let totalPages = 1;
+
+const pageLoader = initPageLoader({
+    message: 'Wir laden alle Gasthochschulen...',
+    subline: 'Globus und Kartenbilder werden vorbereitet.',
+    imageScope: null
+});
+
+const finalizeLoader = () => pageLoader.finish([
+    globeContainer ? waitForImages(globeContainer) : null,
+    cityListEl ? waitForImages(cityListEl) : null
+]);
+
+if (document.readyState === "complete") {
+    finalizeLoader();
+} else {
+    window.addEventListener("load", finalizeLoader, { once: true });
+}
 
 // ------------------- Hilfsfunktionen -------------------
 function createAccordionItem(title, content) {
