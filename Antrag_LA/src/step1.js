@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const vorname = document.querySelector("[name='Vorname'], [name='vorname']");
     const nachname = document.querySelector("[name='Nachname'], [name='nachname']");
     const matrikel = document.querySelector("[name='Matrikel'], [name='matrikelnummer'], [name='Matrikelnummer']");
+    const matrikelHint = document.getElementById("matrikelnummer-hint");
     const kurs = document.querySelector("[name='Kurs']");
     const studiengang = document.getElementById("studiengang-select");
     const semester = document.querySelector("[name='Semester']");
@@ -43,11 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    // Speichert den aktuellen Formularstand im localStorage, damit ein Seitenwechsel oder Reload keine Eingaben verliert.
     function persistStepData() {
         if (!window.storageManager) return;
         window.storageManager.setStep(STEP_KEY, buildStepPayload());
     }
 
+    // Stellt den Formularzustand aus der URL oder dem lokalen Zwischenspeicher wieder her,
+    // damit Back-Navigation und Reloads keine Felder leeren.
     function restoreFromStateOrParams() {
         const saved = window.storageManager?.getStep(STEP_KEY) || {};
         const params = new URLSearchParams(window.location.search);
@@ -93,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //   STUDIENGANG → VERTIEFUNG LOGIK
     // =====================================================
 
+    // Baut die Vertiefungs-Auswahl dynamisch anhand des gewählten Studiengangs auf.
     function updateVertiefungOptions() {
         if (!vertiefungSelect) return;
         vertiefungSelect.innerHTML = `<option value="">Bitte wählen...</option>`;
@@ -161,12 +166,33 @@ document.addEventListener("DOMContentLoaded", () => {
         el?.addEventListener("change", persistStepData);
     });
 
+    function validateMatrikelInput() {
+        if (!matrikel) return true;
+
+        // Entfernt Nicht-Ziffern robust, damit auch Copy-Paste bereinigt wird.
+        const digitsOnly = matrikel.value.replace(/\D+/g, "");
+        if (digitsOnly !== matrikel.value) {
+            matrikel.value = digitsOnly;
+        }
+
+        const isValid = digitsOnly.length > 0;
+        if (!isValid) {
+            matrikel.setCustomValidity("Bitte gib eine gültige Matrikelnummer mit Ziffern ein.");
+            if (matrikelHint) matrikelHint.textContent = "Die Matrikelnummer darf nur aus Zahlen bestehen.";
+        } else {
+            matrikel.setCustomValidity("");
+            if (matrikelHint) matrikelHint.textContent = "";
+        }
+
+        return isValid;
+    }
+
     if (matrikel) {
         matrikel.addEventListener("input", () => {
-            const digits = matrikel.value.replace(/\D+/g, "");
-            if (digits !== matrikel.value) matrikel.value = digits;
+            validateMatrikelInput();
             persistStepData();
         });
+        matrikel.addEventListener("blur", validateMatrikelInput);
     }
 
 
@@ -200,6 +226,12 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
 
             persistStepData();
+
+            const matrikelOk = validateMatrikelInput();
+            if (!matrikelOk) {
+                matrikel?.reportValidity();
+                return;
+            }
 
             if (!form.checkValidity()) {
                 form.reportValidity();

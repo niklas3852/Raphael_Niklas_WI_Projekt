@@ -62,6 +62,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const semester = String(user.semester);
 
+        // Baut die URL-Parameter für einen barrierefreien Zurück-Link (GET-Routing bleibt erhalten).
+        function buildBackParams() {
+            const paramMap = {
+                vorname: user.vorname,
+                nachname: user.nachname,
+                matrikel: user.matrikel,
+                kurs: user.kurs,
+                studiengang: user.studiengang,
+                semester,
+                vertiefung: user.vertiefung,
+                zeitraum: user.zeitraum,
+                studiengangsleitung: user.studiengangsleitung,
+                university: user.university,
+                universityId: user.universityId
+            };
+
+            const paramsBack = new URLSearchParams();
+            Object.entries(paramMap).forEach(([key, value]) => {
+                if (value) paramsBack.set(key, value);
+            });
+
+            if (Array.isArray(user.selectedCourses) && user.selectedCourses.length) {
+                paramsBack.set("selectedCourses", JSON.stringify(user.selectedCourses));
+            }
+
+            return paramsBack;
+        }
+
         // ----------------------------------------------------------
         // 2) DATENBANKEN LADEN
         // ----------------------------------------------------------
@@ -339,6 +367,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         renderLA();
+
+        const backLink = qs(".step-navigation-buttons.step4-nav a[href='./step3.html']");
+        if (backLink) {
+            backLink.href = `./step3.html?${buildBackParams().toString()}`;
+        }
 
         function buildMailtoLink() {
             const subject = encodeURIComponent(`Learning Agreement - ${`${user.vorname} ${user.nachname}`.trim()}`);

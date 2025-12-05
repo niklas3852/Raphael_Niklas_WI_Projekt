@@ -318,3 +318,52 @@ html{
     box-shadow: none;
     transform: none;
 }
+
+/* Barrierearmes Bestätigungs-Modal für Back-Navigation */
+.back-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+}
+
+.back-modal.is-hidden {
+    display: none;
+}
+
+.back-modal__dialog {
+    width: min(32rem, 100%);
+    background: var(--color-surface);
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+    padding: 1.25rem;
+}
+
+.back-modal__header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+}
+
+.back-modal__body {
+    margin: 0 0 1rem;
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.back-modal__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.back-modal__btn {
+    min-width: 8rem;
+}
