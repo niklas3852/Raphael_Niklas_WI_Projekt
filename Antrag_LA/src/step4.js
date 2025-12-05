@@ -3,6 +3,13 @@
 // Behält 100% das Layout der alten Version bei!
 // =======================================================
 
+import { initPageLoader, waitForImages } from "./loading-overlay.js";
+
+const pageLoader = initPageLoader({
+    message: "Wir erstellen deine Vorschau...",
+    subline: "Alle Kursdaten, Bilder und Dokumente werden vorbereitet."
+});
+
 
 (function () {
 
@@ -473,6 +480,11 @@
             const currentParams = new URLSearchParams(window.location.search);
             window.location.href = `./step3.html?${currentParams.toString()}`;
         });
+
+        await pageLoader.finish([
+            waitForImages(document),
+            window.dhbwCoursesPromise
+        ]);
 
     });
 

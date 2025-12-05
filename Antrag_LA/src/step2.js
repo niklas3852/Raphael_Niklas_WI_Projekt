@@ -1,5 +1,11 @@
 import { cities } from '../db/university_data/cities.js';
 import { continents } from '../db/university_data/continents.js';
+import { initPageLoader, waitForImages } from './loading-overlay.js';
+
+const pageLoader = initPageLoader({
+    message: 'Wir laden alle Gasthochschulen...',
+    subline: 'Karten, Bilder und Daten werden im Hintergrund vorbereitet.'
+});
 
 const welcomeTextEl = document.getElementById("welcome-text");
 const welcomeContainer = document.getElementById("welcome-city-container");
@@ -679,3 +685,5 @@ renderContinents();
 setupGlobalCarousel();
 restoreSelectionFromStorage();
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
+window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
+pageLoader.finish([waitForImages(document)]);

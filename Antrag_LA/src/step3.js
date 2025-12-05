@@ -1,4 +1,10 @@
 import { cities } from "../db/university_data/cities.js";
+import { initPageLoader, waitForImages } from "./loading-overlay.js";
+
+const pageLoader = initPageLoader({
+    message: "Wir laden alle Module und Kursdaten...",
+    subline: "Bitte warten, bis Tabellen und Galerien vollständig bereit sind."
+});
 
 (function () {
 
@@ -510,6 +516,11 @@ import { cities } from "../db/university_data/cities.js";
                 persistStep3State();
             }
         });
+
+        await pageLoader.finish([
+            waitForImages(document),
+            window.dhbwCoursesPromise
+        ]);
 
     });
 
