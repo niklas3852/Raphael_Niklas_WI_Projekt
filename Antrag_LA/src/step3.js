@@ -1,4 +1,34 @@
 import { cities } from "../db/university_data/cities.js";
+import { showLoader, hideLoader } from "../components/loaderOverlay.js";
+
+function waitForWindowLoad() {
+    return new Promise(resolve => {
+        if (document.readyState === "complete") return resolve();
+        window.addEventListener("load", () => resolve(), { once: true });
+    });
+}
+
+async function waitForImagesToDecode() {
+    const images = Array.from(document.querySelectorAll("img"));
+    if (!images.length) return;
+
+    await Promise.all(images.map(img => {
+        if (typeof img.decode === "function") {
+            return img.decode().catch(() => new Promise(res => {
+                img.addEventListener("load", res, { once: true });
+                img.addEventListener("error", res, { once: true });
+            }));
+        }
+
+        return new Promise(res => {
+            if (img.complete) return res();
+            img.addEventListener("load", res, { once: true });
+            img.addEventListener("error", res, { once: true });
+        });
+    }));
+}
+
+showLoader();
 
 (function () {
 
@@ -6,6 +36,9 @@ import { cities } from "../db/university_data/cities.js";
     function qsa(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
 
     document.addEventListener("DOMContentLoaded", () => {
+
+        (async () => {
+            try {
 
         // ============================================================
         // 1) URL PARAMETER LADEN
@@ -514,7 +547,7 @@ import { cities } from "../db/university_data/cities.js";
             renderPartnerTable();
         };
 
-        refreshTables();
+        await refreshTables();
         showWelcome(findCity());
 
         document.addEventListener("keydown", e => {
@@ -525,6 +558,15 @@ import { cities } from "../db/university_data/cities.js";
                 refreshTables().then(() => persistStep3State());
             }
         });
+
+            } catch (error) {
+                console.error("Fehler beim Aufbau von Step 3:", error);
+            } finally {
+                await waitForWindowLoad();
+                await waitForImagesToDecode();
+                hideLoader();
+            }
+        })();
 
     });
 

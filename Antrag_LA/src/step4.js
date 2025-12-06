@@ -3,13 +3,89 @@
 // Behält 100% das Layout der alten Version bei!
 // =======================================================
 
-(function () {
+import { showLoader, hideLoader } from "../components/loaderOverlay.js";
 
-    function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
+function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
+
+function waitForWindowLoad() {
+    return new Promise(resolve => {
+        if (document.readyState === "complete") return resolve();
+        window.addEventListener("load", () => resolve(), { once: true });
+    });
+}
+
+async function waitForImagesToDecode() {
+    const images = Array.from(document.querySelectorAll("img"));
+    if (!images.length) return;
+
+    await Promise.all(images.map(img => {
+        if (typeof img.decode === "function") {
+            return img.decode().catch(() => new Promise(res => {
+                img.addEventListener("load", res, { once: true });
+                img.addEventListener("error", res, { once: true });
+            }));
+        }
+
+        return new Promise(res => {
+            if (img.complete) return res();
+            img.addEventListener("load", res, { once: true });
+            img.addEventListener("error", res, { once: true });
+        });
+    }));
+}
+
+function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+        script.onload = () => {
+            if (window.pdfjsLib?.GlobalWorkerOptions) {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            }
+            resolve(window.pdfjsLib);
+        };
+        script.onerror = () => reject(new Error("PDF.js konnte nicht geladen werden"));
+        document.head.appendChild(script);
+    });
+}
+
+async function renderPdfPreview(slotEl) {
+    if (!slotEl) return;
+
+    try {
+        const pdfjsLib = await loadPdfJs();
+        if (!pdfjsLib) return;
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "pdf-preview-canvas";
+        slotEl.innerHTML = "";
+        slotEl.appendChild(canvas);
+
+        const pdfUrl = new URL("../dhbw-antrag-learning-agreement.pdf", window.location.href).toString();
+        const doc = await pdfjsLib.getDocument(pdfUrl).promise;
+        const page = await doc.getPage(1);
+        const viewport = page.getViewport({ scale: 1.2 });
+        const ctx = canvas.getContext("2d");
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+    } catch (error) {
+        console.error("PDF-Vorschau konnte nicht gerendert werden:", error);
+    }
+}
+
+showLoader();
+
+(function () {
 
 document.addEventListener("DOMContentLoaded", () => {
 
     (async () => {
+
+        try {
 
         // ----------------------------------------------------------
         // 1) URL PARAMETER LADEN
@@ -201,6 +277,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             preview.innerHTML = "";
 
+            const pdfCanvasSlot = document.createElement("div");
+            pdfCanvasSlot.id = "pdf-canvas-slot";
+            pdfCanvasSlot.setAttribute("aria-hidden", "true");
+            preview.appendChild(pdfCanvasSlot);
+
             // ------------ LOGO -----------------
             const logo = document.createElement("img");
             logo.src = "https://citationstyler.com/wp-content/uploads/2024/04/DHBW-logo-square.png.webp";
@@ -357,9 +438,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             preview.appendChild(signatures);
 
+            return pdfCanvasSlot;
+
         }
 
-        renderLA();
+        const pdfCanvasSlot = renderLA();
+        await renderPdfPreview(pdfCanvasSlot);
 
         const backLink = qs(".step-navigation-buttons.step4-nav a[href='./step3.html']");
         if (backLink) {
@@ -490,6 +574,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const currentParams = new URLSearchParams(window.location.search);
             window.location.href = `./step3.html?${currentParams.toString()}`;
         });
+
+        } catch (error) {
+            console.error("Fehler beim Aufbau von Step 4:", error);
+        } finally {
+            await waitForWindowLoad();
+            await waitForImagesToDecode();
+            hideLoader();
+        }
 
     })();
 

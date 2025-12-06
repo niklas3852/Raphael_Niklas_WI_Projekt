@@ -1,0 +1,43 @@
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(1px);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.loader-overlay.is-visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.loader-overlay__spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 6px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  animation: loaderOverlaySpin 1s linear infinite;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+}
+
+.loader-overlay__text {
+  margin-top: 16px;
+  color: #ffffff;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes loaderOverlaySpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

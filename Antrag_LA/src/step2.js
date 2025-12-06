@@ -1,5 +1,8 @@
 import { cities } from '../db/university_data/cities.js';
 import { continents } from '../db/university_data/continents.js';
+import { showLoader, hideLoader } from '../components/loaderOverlay.js';
+
+showLoader();
 
 const welcomeTextEl = document.getElementById("welcome-text");
 const welcomeContainer = document.getElementById("welcome-city-container");
@@ -143,12 +146,14 @@ function closeAccordion(header) {
 // ... (Rest des JavaScript-Codes bleibt gleich)
 
 // ------------------- Stadt-Kacheln -------------------
-function renderCities() {
+async function renderCities() {
     cityListEl.innerHTML = "";
     cityListEl.style.position = "relative";
 
     // ✨ NEU: Städte alphabetisch nach Name sortieren
     cities.sort((a, b) => a.name.localeCompare(b.name));
+
+    const temperaturePromises = [];
 
     cities.forEach((city) => {
         const tile = document.createElement("div");
@@ -166,11 +171,13 @@ function renderCities() {
         `;
         tile.addEventListener("click", () => showCityInfo(city));
         cityListEl.appendChild(tile);
-        fetchTemperature(city);
+        temperaturePromises.push(fetchTemperature(city));
     });
 
     updatePagination();
     layoutTiles(Array.from(document.querySelectorAll(".city-tile")));
+
+    await Promise.allSettled(temperaturePromises);
 }
 
 function updatePagination() {
@@ -678,9 +685,51 @@ function restoreSavedSelection() {
         showCityInfo(city);
     }
 }
-// ------------------- INIT -------------------
-renderCities();
-renderContinents();
-setupGlobalCarousel();
-restoreSavedSelection();
+
+function waitForWindowLoad() {
+    return new Promise(resolve => {
+        if (document.readyState === "complete") return resolve();
+        window.addEventListener("load", () => resolve(), { once: true });
+    });
+}
+
+async function waitForImagesToDecode() {
+    const images = Array.from(document.querySelectorAll("img"));
+    if (!images.length) return;
+
+    await Promise.all(images.map(img => {
+        const decodePromise = img.decode
+            ? img.decode().catch(() => new Promise(res => {
+                img.addEventListener("load", res, { once: true });
+                img.addEventListener("error", res, { once: true });
+            }))
+            : null;
+
+        if (decodePromise) return decodePromise;
+
+        return new Promise(res => {
+            if (img.complete) return res();
+            img.addEventListener("load", res, { once: true });
+            img.addEventListener("error", res, { once: true });
+        });
+    }));
+}
+
+async function initializeStep2() {
+    try {
+        await renderCities();
+        renderContinents();
+        setupGlobalCarousel();
+        restoreSavedSelection();
+    } catch (error) {
+        console.error("Fehler beim Aufbau von Step 2:", error);
+    } finally {
+        await waitForWindowLoad();
+        await waitForImagesToDecode();
+        hideLoader();
+    }
+}
+
+initializeStep2();
+
 window.addEventListener("resize", () => layoutTiles(Array.from(document.querySelectorAll(".city-tile"))));
